@@ -1,0 +1,59 @@
+/* admin.css */
+.erp-sync-accordion-container {
+  margin: 20px 0;
+  border: 1px solid #ccd0d4;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.erp-sync-accordion {
+  border-bottom: 1px solid #ccd0d4;
+}
+
+.erp-sync-accordion:last-child {
+  border-bottom: none;
+}
+
+.erp-sync-accordion-header {
+  padding: 15px 20px;
+  background: #f8f9fa;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.erp-sync-accordion-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.toggle-indicator:before {
+  content: "\f140";
+  font: normal 20px/1 dashicons;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.erp-sync-accordion.open .toggle-indicator:before {
+  content: "\f142";
+}
+
+.erp-sync-accordion-content {
+  padding: 0 20px 15px;
+  display: none;
+}
+
+.erp-sync-accordion.open .erp-sync-accordion-content {
+  display: block;
+}
+
+/* Style the sub-options */
+.sub-option {
+  opacity: 0.7;
+}
+
+.sub-option.active {
+  opacity: 1;
+}

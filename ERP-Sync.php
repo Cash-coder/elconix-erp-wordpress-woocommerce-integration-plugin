@@ -7,9 +7,42 @@
 
 if (!defined('ABSPATH')) exit;
 
-add_action('init', function() {
-  error_log('AAAAAA - PHP error_log');
-});
+
+// Define plugin constants
+define('ERP_SYNC_PLUGIN_DIR', plugin_dir_path(__FILE__));
+define('ERP_SYNC_PLUGIN_URL', plugin_dir_url(__FILE__));
+
+// Include the settings page
+require_once ERP_SYNC_PLUGIN_DIR . 'includes/settings-page.php';
+
+
+// add admin menu icon link
+add_action('admin_menu', 'add_ERP_menu_to_admin_sidebar');
+
+function add_ERP_menu_to_admin_sidebar() {
+    add_menu_page(
+        'ERP-Sync',                 // Page title (browser tab)
+        'ERP Sync',                 // Menu title (displayed in sidebar)
+        'manage_options',           // Capability required (admin-level access)
+        'erp-sync',                 // Menu slug (URL parameter)
+        'erp_sync_admin_page',      // Callback function to render the page
+        'dashicons-randomize',  // Icon (Dashicon class)
+        80                         // Position (lower number = higher placement)
+    );
+}
+
+// Optional: Define the callback function for the page content
+function erp_sync_admin_page() {
+    echo '<div class="wrap">';
+    echo '<h1>ERP-Sync Settings</h1>';
+    echo '<p>This is where your plugin content goes.</p>';
+    echo '</div>';
+}
+
+
+// add_action('init', function() {
+//   error_log('AAAAAA - PHP error_log');
+// });
 
 
 add_action('init', function() {
@@ -18,7 +51,7 @@ add_action('init', function() {
   
   foreach ( $prods as $product ) {
     $name = $product->get_name() . "<br>";
-    error_log($product);
+    // error_log($product);
     // echo $product->get_name() . "<br>";
   }
 });
