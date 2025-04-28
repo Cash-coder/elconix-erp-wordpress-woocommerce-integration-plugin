@@ -36,7 +36,11 @@ function add_ERP_menu_to_admin_sidebar() {
 function erp_sync_admin_page() {
     echo '<div class="wrap">';
     echo '<h1>ERP-Sync Settings</h1>';
-    echo '<p>This is where your plugin content goes.</p>';
+    echo '<form method="post" action="options.php">';
+    settings_fields('yourplugin_options_group');
+    do_settings_sections('erp-sync');
+    submit_button('Save Settings');
+    echo '</form>';
     echo '</div>';
 }
 
