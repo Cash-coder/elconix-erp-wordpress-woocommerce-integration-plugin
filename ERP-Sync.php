@@ -7,6 +7,7 @@
 
 if (!defined('ABSPATH')) exit;
 
+// test 
 
 // Define plugin constants
 define('ERP_SYNC_PLUGIN_DIR', plugin_dir_path(__FILE__));
