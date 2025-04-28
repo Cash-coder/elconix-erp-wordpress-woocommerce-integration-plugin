@@ -16,7 +16,6 @@ define('ERP_SYNC_PLUGIN_URL', plugin_dir_url(__FILE__));
 // Include the settings page
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/settings-page.php';
 
-
 // add admin menu icon link
 add_action('admin_menu', 'add_ERP_menu_to_admin_sidebar');
 
@@ -37,7 +36,7 @@ function erp_sync_admin_page() {
     echo '<div class="wrap">';
     echo '<h1>ERP-Sync Settings</h1>';
     echo '<form method="post" action="options.php">';
-    settings_fields('yourplugin_options_group');
+    settings_fields('erp_sync_options_group');
     do_settings_sections('erp-sync');
     submit_button('Save Settings');
     echo '</form>';
@@ -45,9 +44,9 @@ function erp_sync_admin_page() {
 }
 
 
-// add_action('init', function() {
-//   error_log('AAAAAA - PHP error_log');
-// });
+add_action('init', function() {
+  error_log('AAAAAA - PHP error_log');
+});
 
 
 add_action('init', function() {

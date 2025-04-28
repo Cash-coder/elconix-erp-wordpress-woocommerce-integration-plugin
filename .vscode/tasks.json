@@ -1,0 +1,22 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "load-plugin",
+      "type": "shell",
+      "command": "curl https://personal-freelance.local/wp-admin/",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "never",  // Prevents the terminal from showing
+        "panel": "shared"   // Runs silently in the background
+    }
+    },
+    {
+      "label": "echo",
+      "type": "shell",
+      "command": "notify-send 'bind is working =)"
+    }
+  ]
+}

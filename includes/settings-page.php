@@ -1,8 +1,8 @@
 <?php
 
 // Register settings (add to existing admin_init hook or create one)
-add_action('admin_init', 'yourplugin_register_toggle_settings');
-function yourplugin_register_toggle_settings() {
+add_action('admin_init', 'erp_sync_register_toggle_settings');
+function erp_sync_register_toggle_settings() {
     register_setting(
         'erp_sync_options_group', // Group name (use existing if you have one)
         'erp_sync_toggles',      // Option key (stores all toggles as an array)
@@ -11,26 +11,49 @@ function yourplugin_register_toggle_settings() {
 
     // Add a section (skip if you already have one)
     add_settings_section(
-        'yourplugin_toggles_section',
-        'Toggle Settings',
+        'erp_sync_toggles_section',
+        'Ajustes Generales',
         '__return_empty_string', // No description needed
+        // 'Configure direccion de sincronizacion', 
         'erp-sync'    // Use your existing settings page slug
     );
 
-    // Add toggle fields
+    // woo to ERP
     add_settings_field(
-        'enable_feature_x',
-        'Enable Feature X',
-        'yourplugin_toggle_callback',
+        'woo_to_ERP',
+        'Enable ERP to Woocommerce sync',
+        'erp_sync_toggle_callback',
         'erp-sync',   // Your existing settings page slug
-        'yourplugin_toggles_section',
-        ['label_for' => 'enable_feature_x'] // Target key in options array
+        'erp_sync_toggles_section',
+        ['label_for' => 'woo_to_ERP'] // Target key in options array
+    );
+
+    // ERP to woo
+    add_settings_field(
+        'ERP_to_woo',
+        'Enable Woocommerce to ERP sync',
+        'erp_sync_toggle_callback',
+        'erp-sync',   // Your existing settings page slug
+        'erp_sync_toggles_section',
+        ['label_for' => 'ERP_to_woo'] // Target key in options array
     );
 }
 
+add_action('init', function() {
+    $options = get_option('erp_sync_toggles', []);
+    error_log(print_r($options, true));
+    error_log($options);
+    // $options = get_option('erp_sync_register_toggle_settings', []);
+//     foreach ($options as $option) {
+//         error_log($option);
+//   }
+  });
 
-function yourplugin_toggle_callback($args) {
+function erp_sync_toggle_callback($args) {
   $options = get_option('erp_sync_toggles', []);
+//   foreach ($options as $option) {
+//     error_log($option);
+//   }
   $is_checked = isset($options[$args['label_for']]) ? 'checked' : '';
   echo '
   <label class="switch">
@@ -40,8 +63,10 @@ function yourplugin_toggle_callback($args) {
   ';
 }
 
-add_action('admin_head', 'yourplugin_toggle_styles');
-function yourplugin_toggle_styles() {
+
+// CSS
+add_action('admin_head', 'erp_sync_toggle_styles');
+function erp_sync_toggle_styles() {
     echo '
     <style>
         .switch {
