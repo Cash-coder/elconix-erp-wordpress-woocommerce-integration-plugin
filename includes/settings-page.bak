@@ -51,9 +51,6 @@ add_action('init', function() {
 
 function erp_sync_toggle_callback($args) {
   $options = get_option('erp_sync_toggles', []);
-//   foreach ($options as $option) {
-//     error_log($option);
-//   }
   $is_checked = isset($options[$args['label_for']]) ? 'checked' : '';
   echo '
   <label class="switch">

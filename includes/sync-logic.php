@@ -1,10 +1,20 @@
 <?php
 // Sync function
 function perform_erp_sync() {
-  
-  $options = get_option('erp_sync_toggles', []);
+  error_log('running sync');
+  // $options = get_option('erp_sync_toggles', []);
+  $options = get_option('plugin_erpsync');
 
-  error_log('running');
-  sleep(5);
+  // if woo to ERP sync is enabled
+  if (isset($options['woo_to_ERP']) && $options['woo_to_ERP'] == 1) {
+    error_log('woo to ERP enabled');
+
+    // if orders sync is enabled
+    if (isset($options['orders_sync'])) { // && $options['orders_sync'] == 1) {
+      error_log('orders sync enabled');
+    }
+  } 
+
+  // sleep(5);
   return true;
 }

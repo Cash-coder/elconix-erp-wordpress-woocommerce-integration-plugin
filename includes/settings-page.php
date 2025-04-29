@@ -13,17 +13,62 @@ function erpsync_init_fn(){
         'section_text_fn', // call back that displays the HTML
         'erp-sync'); // page, same as in add_settings_field() and do_settings_section()
       
-    // woo to ERP
+    // woo to ERP  ********************************************
     add_settings_field(
         'woo_to_ERP',
-        'Activar Woocommerce a ERP sync',
+        'Woocommerce a ERP sync',
         'woo_to_erp_fn',
         'erp-sync',   // Your existing settings page slug
         'main_section',
         ['label_for' => 'woo_to_ERP'] // Target key in options array
     );
 
-	add_settings_field(
+    // orders sync
+    add_settings_field(
+      'orders sync',
+      'Sincronizar Pedidos',
+      'orders_sync_fn',
+      'erp-sync',
+      'main_section',
+      // 'orders_sync',
+      [
+        'label_for' => 'orders_sync',
+        'class' => 'sub-option' // This will apply to the <tr>
+      ]
+    );
+    
+    // returns sync
+    add_settings_field(
+      'returns sync',
+      'Sincronizar Devoluciones',
+      'returns_sync_fn',
+      'erp-sync',
+      'main_section',
+      'returns_sync'
+    );
+
+    // ERP to woo  ********************************************
+    add_settings_field(
+      'ERP_to_woo',
+      'ERP a Woocommerce',
+      'erp_to_woo_fn',
+      'erp-sync',   // Your existing settings page slug
+      'main_section',
+      ['label_for' => 'erp_to_woo'] // Target key in options array
+  );
+
+   //products sync
+   add_settings_field(
+    'prods sync',
+    'Sincronizar Devoluciones',
+    'prods_sync_fn',
+    'erp-sync',
+    'main_section',
+    'prods_sync'
+  );
+
+
+	  add_settings_field(
         'plugin_text_string', // id
         'Text Input', // title
         'setting_string_fn', // callback
@@ -38,12 +83,7 @@ function erpsync_init_fn(){
     add_settings_field('radio_buttons', 'Select Shape', 'setting_radio_fn', 'erp-sync', 'main_section');
     add_settings_field('drop_down1', 'Select Color', 'erpsync_setting_dropdown_fn', 'erp-sync', 'main_section');
 
-  add_settings_field(
-    'plugin_chk1',
-    'Restore Defaults Upon Reactivation?',
-    'setting_chk1_fn',
-    'erp-sync',
-    'main_section');
+ 
 
     // ERP to woo
     // add_settings_field(
