@@ -14,7 +14,7 @@
 
 
 // Specify Hooks/Filters
-register_activation_hook(__FILE__, 'add_erpsync_defaults_fn');
+register_activation_hook('erp-sync', 'add_erpsync_defaults_fn');
 add_action('admin_init', 'erpsync_init_fn' );
 add_action('admin_menu', 'erpsync_add_page_fn');
 
@@ -47,23 +47,23 @@ function erpsync_init_fn(){
     'main_section', // id
     'ERP Sync Settings', // title
     'section_text_fn', // call back that displays the HTML
-    __FILE__); // page, same as in add_settings_field() and do_settings_section()
+    'erp-sync'); // page, same as in add_settings_field() and do_settings_section()
   
 	add_settings_field(
     'plugin_text_string', // id
     'Text Input', // title
     'setting_string_fn', // callback
-    __FILE__, // page
+    'erp-sync', // page
     'main_section' // section: same as id in add_settings_section()
     // args array
   ); 
 	
-  add_settings_field('plugin_text_pass', 'Password Text Input', 'setting_pass_fn', __FILE__, 'main_section');
-	add_settings_field('plugin_textarea_string', 'Large Textbox!', 'setting_textarea_fn', __FILE__, 'main_section');
-	add_settings_field('plugin_chk2', 'A Checkbox', 'setting_chk2_fn', __FILE__, 'main_section');
-	add_settings_field('radio_buttons', 'Select Shape', 'setting_radio_fn', __FILE__, 'main_section');
-	add_settings_field('drop_down1', 'Select Color', 'erpsync_setting_dropdown_fn', __FILE__, 'main_section');
-	add_settings_field('plugin_chk1', 'Restore Defaults Upon Reactivation?', 'setting_chk1_fn', __FILE__, 'main_section');
+  add_settings_field('plugin_text_pass', 'Password Text Input', 'setting_pass_fn', 'erp-sync', 'main_section');
+	add_settings_field('plugin_textarea_string', 'Large Textbox!', 'setting_textarea_fn', 'erp-sync', 'main_section');
+	add_settings_field('plugin_chk2', 'A Checkbox', 'setting_chk2_fn', 'erp-sync', 'main_section');
+	add_settings_field('radio_buttons', 'Select Shape', 'setting_radio_fn', 'erp-sync', 'main_section');
+	add_settings_field('drop_down1', 'Select Color', 'erpsync_setting_dropdown_fn', 'erp-sync', 'main_section');
+	add_settings_field('plugin_chk1', 'Restore Defaults Upon Reactivation?', 'setting_chk1_fn', 'erp-sync', 'main_section');
 }
 
 // Add sub page to the Settings Menu
@@ -72,7 +72,7 @@ function erpsync_add_page_fn() {
     'ERP Sync', // page title displayed in browser title bar    
     'ERP Sync', // display link in the settings menu
     'administrator', // access level
-    __FILE__, // unique page name
+    'erp-sync', // unique page name
     'options_page_fn'); // callback function to display the options form
 }
 
@@ -119,7 +119,11 @@ function setting_pass_fn() {
 // CHECKBOX - Name: plugin_erpsync[chkbox1]
 function setting_chk1_fn() {
 	$options = get_option('plugin_erpsync');
-	if($options['chkbox1']) { $checked = ' checked="checked" '; }
+  $checked= '';
+	// if($options['chkbox1']) { $checked = ' checked="checked" '; }
+  if(isset($options['chkbox1']) && $options['chkbox1']) { 
+    $checked = ' checked="checked" '; 
+}
 	echo "<input ".$checked." id='erpsync_chk1' name='plugin_erpsync[chkbox1]' type='checkbox' />";
 }
 
@@ -127,7 +131,10 @@ function setting_chk1_fn() {
 function setting_chk2_fn() {
 	$options = get_option('plugin_erpsync');
 	if($options['chkbox2']) { $checked = ' checked="checked" '; }
-	echo "<input ".$checked." id='erpsync_chk2' name='plugin_erpsync[chkbox2]' type='checkbox' />";
+	// if(isset($options['chkbox1']) && $options['chkbox1']) { 
+  //   $checked = ' checked="checked" '; 
+  // }
+  echo "<input ".$checked." id='erpsync_chk2' name='plugin_erpsync[chkbox2]' type='checkbox' />";
 }
 
 // RADIO-BUTTON - Name: plugin_erpsync[option_set1]
@@ -149,7 +156,7 @@ function options_page_fn() {
       Some optional text here explaining the overall purpose of the options and what they relate to etc.
       <form action="options.php" method="post">
       <?php settings_fields('plugin_erpsync'); ?>
-      <?php do_settings_sections(__FILE__); ?>
+      <?php do_settings_sections('erp-sync'); ?>
       <p class="submit">
         <input name="Submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes'); ?>" />
       </p>
