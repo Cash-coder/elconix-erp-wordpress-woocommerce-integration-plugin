@@ -117,9 +117,9 @@ add_action('admin_head', 'erp_sync_suboptions_styles');
 function erp_sync_suboptions_styles() {
 	echo '
 		<style>
-			.sub-option {
-				margin-left: 2em;
-			}
+			// .sub-option {
+			// 	margin-left: 2em;
+			// }
 
 			// tr.sub-option > th,
 			// tr.sub-option > td {
