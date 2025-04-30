@@ -1,5 +1,22 @@
 <?php
 
+// enqueue CSS
+// add_action('admin_enqueue_scripts', 'erp_sync_admin_styles');
+
+// function erp_sync_admin_styles($hook) {
+    // Only load on your plugin's settings page
+    // error_log('aaa');
+    // error_log($hook);
+		// if ('settings_page_erp-sync' === $hook) {
+        // wp_enqueue_style(
+        //     'erp-sync-admin-css',
+        //     plugins_url('css/admin.css', __FILE__),
+        //     array(),
+            // filetime(plugin_dir_path(__FILE__) . 'css/admin.css')
+        // );
+    // }
+// }
+
 // Woo to ERP *********************************************
 function woo_to_erp_fn() {
 	$options = get_option('plugin_erpsync');
@@ -18,7 +35,8 @@ function orders_sync_fn() {
 	if(isset($options['orders_sync']) && $options['orders_sync']) { 
     $checked = ' checked="checked" '; 
 	}
-	echo "<input class='sub-option' ".$checked." id='orders_chk' name='plugin_erpsync[orders_sync]' type='checkbox' />";
+	// echo "<input class='sub-option' ".$checked." id='orders_chk' name='plugin_erpsync[orders_sync]' type='checkbox' />";
+	echo '<div class="sub-option"><input id="orders_chk" name="plugin_erpsync[orders_sync]" type="checkbox" /></div>';
 }
 
 // returns
@@ -95,15 +113,19 @@ function erp_sync_toggle_styles() {
 				';
 }
 
-// add_action('admin_head', 'erp_sync_suboptions_styles');
+add_action('admin_head', 'erp_sync_suboptions_styles');
 function erp_sync_suboptions_styles() {
 	echo '
 		<style>
-			tr.sub-option > th,
-			tr.sub-option > td {
-				padding-left: 2em;
+			.sub-option {
+				margin-left: 2em;
+			}
+
+			// tr.sub-option > th,
+			// tr.sub-option > td {
+			// 	padding-left: 2em;
 				// border: 10px solid red;
-			}	
+			/
 		</style>
 	';
 }
