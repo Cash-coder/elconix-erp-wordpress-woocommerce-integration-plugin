@@ -3,12 +3,8 @@
  * Plugin Name: ERP Sync
  * Description: Sync WooCommerce data with ERP system
  * Version: 1.0
+ * Author: Vako Lovecraft
  */
-
- /** to do
-  * 
-  */
-
 
 // Define plugin constants
 define('ERP_SYNC_PLUGIN_DIR', plugin_dir_path(__FILE__));
@@ -37,6 +33,16 @@ function add_ERP_menu_to_admin_sidebar() {
       'dashicons-randomize',  // Icon (Dashicon class)
       30                         // Position (lower number = higher placement)
     );
+}
+
+// Add sub page to the Settings Menu
+function erpsync_add_page_fn() {
+	add_options_page(
+    'ERP Sync', // page title displayed in browser title bar    
+    'ERP Sync', // display link in the settings menu
+    'administrator', // access level
+    'erp-sync', // unique page name
+    'erpsync_page_fn'); // callback function to display the options form
 }
 
 // Define default option settings

@@ -17,6 +17,8 @@
     // }
 // }
 
+
+
 // Woo to ERP *********************************************
 function woo_to_erp_fn() {
 	$options = get_option('plugin_erpsync');
@@ -148,12 +150,6 @@ function  erpsync_setting_dropdown_fn() {
 	echo "</select>";
 }
 
-// TEXTAREA - Name: plugin_options[text_area]
-function setting_textarea_fn() {
-	$options = get_option('plugin_erpsync');
-	echo "<textarea id='erpsync_textarea_string' name='plugin_erpsync[text_area]' rows='7' cols='50' type='textarea'>{$options['text_area']}</textarea>";
-}
-
 // API URL
 function setting_api_url_fn() {
 		$options = get_option('plugin_erpsync');
@@ -164,6 +160,14 @@ function setting_api_url_fn() {
 		echo "<input id='api_url_txtinput' name='plugin_erpsync[api_url]' size='40' type='text' value='{$options['api_url']}' />";
 	}
 
+// LICENCE KEY
+function setting_license_key_fn() {
+	$id = 'license_key';
+	$options = get_option('plugin_erpsync');
+	// echo "<input id='api_url' name='plugin_erpsync[text_string]' size='40' type='text' value='{$options['text_string']}' />";		
+	$value = isset($options[$id]) ? $options[$id] : 'Introduzca sare	Clave de Licencia Plugin';
+	echo "<input id='api_url_txtinput' name='plugin_erpsync[$id]' size='40' type='text' value='{$value}' />";
+}
 
 // API KEY
 function setting_apikey_fn() {
@@ -173,32 +177,39 @@ function setting_apikey_fn() {
 	echo "<input id='erpsync_api_key' name='plugin_erpsync[api_key]' size='40' type='password' value='{$value}' />";
 }
 
+// SAMPLE CALLBACKS *************************
+
+// TEXTAREA - Name: plugin_options[text_area]
+// function setting_textarea_fn() {
+// 	$options = get_option('plugin_erpsync');
+// 	echo "<textarea id='erpsync_textarea_string' name='plugin_erpsync[text_area]' rows='7' cols='50' type='textarea'>{$options['text_area']}</textarea>";
+// }
+
 // PASSWORD-TEXTBOX - Name: plugin_erpsync[pass_string]
-function setting_pass_fn() {
-	$options = get_option('plugin_erpsync');
-	echo "<input id='erpsync_text_pass' name='plugin_erpsync[pass_string]' size='40' type='password' value='{$options['pass_string']}' />";
-}
+// function setting_pass_fn() {
+// 	$options = get_option('plugin_erpsync');
+// 	echo "<input id='erpsync_text_pass' name='plugin_erpsync[pass_string]' size='40' type='password' value='{$options['pass_string']}' />";
+// }
 
-// CHECKBOX - Name: plugin_erpsync[chkbox2]
-function setting_chk2_fn() {
-	$options = get_option('plugin_erpsync');
-	if($options['chkbox2']) { $checked = ' checked="checked" '; }
-	// if(isset($options['chkbox1']) && $options['chkbox1']) { 
-  //   $checked = ' checked="checked" '; 
-  // }
-  echo "<input ".$checked." id='erpsync_chk2' name='plugin_erpsync[chkbox2]' type='checkbox' />";
-}
+// // CHECKBOX - Name: plugin_erpsync[chkbox2]
+// function setting_chk2_fn() {
+// 	$options = get_option('plugin_erpsync');
+// 	if($options['chkbox2']) { $checked = ' checked="checked" '; }
+// 	// if(isset($options['chkbox1']) && $options['chkbox1']) { 
+//   //   $checked = ' checked="checked" '; 
+//   // }
+//   echo "<input ".$checked." id='erpsync_chk2' name='plugin_erpsync[chkbox2]' type='checkbox' />";
+// }
 
-// RADIO-BUTTON - Name: plugin_erpsync[option_set1]
-function setting_radio_fn() {
-	$options = get_option('plugin_erpsync');
-	$items = array("Square", "Triangle", "Circle");
-	foreach($items as $item) {
-		$checked = ($options['option_set1']==$item) ? ' checked="checked" ' : '';
-		echo "<label><input ".$checked." value='$item' name='plugin_erpsync[option_set1]' type='radio' /> $item</label><br />";
-	}
-}
-
+// // RADIO-BUTTON - Name: plugin_erpsync[option_set1]
+// function setting_radio_fn() {
+// 	$options = get_option('plugin_erpsync');
+// 	$items = array("Square", "Triangle", "Circle");
+// 	foreach($items as $item) {
+// 		$checked = ($options['option_set1']==$item) ? ' checked="checked" ' : '';
+// 		echo "<label><input ".$checked." value='$item' name='plugin_erpsync[option_set1]' type='radio' /> $item</label><br />";
+// 	}
+// }
 
 // // CHECKBOX - Name: plugin_erpsync[chkbox1]
 // function setting_chk1_fn() {

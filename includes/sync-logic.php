@@ -6,7 +6,7 @@ function perform_erp_sync() {
   $options = get_option('plugin_erpsync');
 
   // foreach ($options as $option) {error_log($option);}
-  error_log($options['api_key']);
+  error_log($options['license_key']);
   
 
   // if woo to ERP sync is enabled
