@@ -9,7 +9,7 @@ function erpsync_init_fn(){
 
     add_settings_section(
         'main_section', // id
-        'Configuración de sincronización', // title
+        'Configuración de Sincronización', // title
         'section_text_fn', // call back that displays the HTML
         'erp-sync'); // page, same as in add_settings_field() and do_settings_section()
       

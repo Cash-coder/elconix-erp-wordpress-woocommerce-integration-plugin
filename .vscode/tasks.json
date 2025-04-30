@@ -16,6 +16,7 @@
     {
       "label": "load-plugin",
       "type": "shell",
+      // needed maintenance: update cookie and Nonce
       "command": "curl -X POST 'http://personal-freelance.local/wp-admin/options-general.php?page=erp-sync' \\\n    -H 'Content-Type: application/x-www-form-urlencoded' \\\n    -H 'User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:134.0) Gecko/20100101 Firefox/134.0' \\\n    -H 'Referer: http://personal-freelance.local/wp-admin/options-general.php?page=erp-sync' \\\n    -H 'Origin: http://personal-freelance.local' \\\n    -H 'Cookie: wordpress_9b3b275e42f32fafb3a3bd2e7cc0e832=user%7C1746173094%7CulymnJ1oWnkoQFoqy3KeYdwz2MooY18VXGLrzNJLILc%7C224671f6aafceca955feda5a1cdd58d62fc10ae4c37dc0514f19463b69043fae; wordpress_test_cookie=WP%20Cookie%20check; wordpress_logged_in_9b3b275e42f32fafb3a3bd2e7cc0e832=user%7C1746173094%7CulymnJ1oWnkoQFoqy3KeYdwz2MooY18VXGLrzNJLILc%7C380f322b378441f93e04a65c106386352a769de294b642c27c032265324923ef; tk_ai=woo%3AKz3JR5m04XR%2F1gRaFvw7IjRN; wp-settings-1=libraryContent%3Dbrowse%26editor%3Dtinymce; wp-settings-time-1=1746000294' \\\n    --data-urlencode 'erpsync_nonce=ab2a60af5c' \\\n    --data-urlencode '_wp_http_referer=/wp-admin/options-general.php?page=erp-sync' \\\n    --data-urlencode 'erpsync_manual_sync=Sincronizar Ahora'",
       "problemMatcher": [],
       "presentation": {

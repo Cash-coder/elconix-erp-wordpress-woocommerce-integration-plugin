@@ -24,6 +24,21 @@ register_activation_hook('erp-sync', 'add_erpsync_defaults_fn');
 add_action('admin_init', 'erpsync_init_fn' );
 add_action('admin_menu', 'erpsync_add_page_fn');
 
+// add admin menu icon link
+add_action('admin_menu', 'add_ERP_menu_to_admin_sidebar');
+
+function add_ERP_menu_to_admin_sidebar() {
+    add_menu_page(
+      'ERP-Sync',                 // Page title (browser tab)
+      'ERP Sync',                 // Menu title (displayed in sidebar)
+      'manage_options',           // Capability required (admin-level access)
+      'erp-sync',                 // Menu slug (URL parameter)
+      'erpsync_page_fn',      // Callback function to render the page
+      'dashicons-randomize',  // Icon (Dashicon class)
+      30                         // Position (lower number = higher placement)
+    );
+}
+
 // Define default option settings
 function add_erpsync_defaults_fn() {
 	$tmp = get_option('plugin_erpsync'); // change for my options
