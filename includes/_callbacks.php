@@ -120,7 +120,7 @@ function erp_sync_suboptions_styles() {
 			// .sub-option {
 			// 	margin-left: 2em;
 			// }
-			// asdfasd?
+
 			// tr.sub-option > th,
 			// tr.sub-option > td {
 			// 	padding-left: 2em;
@@ -132,7 +132,7 @@ function erp_sync_suboptions_styles() {
 
 // Section HTML, displayed before the first option
 function  section_text_fn() {
-	echo '<p>Below are some examples of different option controls.</p>';
+	echo '<p>Seleccione opciones de integración y haga click en <strong>Guardar Cambios</strong>.</p>';
 }
 
 // DROP-DOWN-BOX - Name: plugin_erpsync[dropdown1]
@@ -154,11 +154,17 @@ function setting_textarea_fn() {
 	echo "<textarea id='erpsync_textarea_string' name='plugin_erpsync[text_area]' rows='7' cols='50' type='textarea'>{$options['text_area']}</textarea>";
 }
 
+// API URL
+function setting_api_url_fn() {
+		$options = get_option('plugin_erpsync');
+		echo "<input id='api_url' name='plugin_erpsync[text_string]' size='40' type='text' value='{$options['text_string']}' />";
+	}
+
 // TEXTBOX - Name: plugin_erpsync[text_string]
-function setting_string_fn() {
-	$options = get_option('plugin_erpsync');
-	echo "<input id='erpsync_text_string' name='plugin_erpsync[text_string]' size='40' type='text' value='{$options['text_string']}' />";
-}
+// function setting_string_fn() {
+// 	$options = get_option('plugin_erpsync');
+// 	echo "<input id='erpsync_text_string' name='plugin_erpsync[text_string]' size='40' type='text' value='{$options['text_string']}' />";
+// }
 
 // PASSWORD-TEXTBOX - Name: plugin_erpsync[pass_string]
 function setting_pass_fn() {

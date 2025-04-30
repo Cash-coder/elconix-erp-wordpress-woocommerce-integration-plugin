@@ -75,8 +75,8 @@ function erpsync_page_fn() {
   ?>
     <div class="wrap">
       <div class="icon32" id="icon-options-general"><br></div>
-      <h2>ERP Sync Options Page</h2>
-      Some optional text here explaining the overall purpose of the options and what they relate to etc.
+      <h1>Integración Elconix ERP</h1>
+      <!-- Some optional text here explaining the overall purpose of the options and what they relate to etc. -->
       <form action="options.php" method="post">
       <?php settings_fields('plugin_erpsync'); ?>
       <?php do_settings_sections('erp-sync'); ?>

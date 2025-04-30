@@ -1,9 +1,12 @@
 <?php
 // Sync function
 function perform_erp_sync() {
-  error_log('running sync');
+  error_log('------------running sync------------');
   // $options = get_option('erp_sync_toggles', []);
   $options = get_option('plugin_erpsync');
+
+  foreach ($options as $option) {error_log($option);}
+  
 
   // if woo to ERP sync is enabled
   if (isset($options['woo_to_ERP']) && $options['woo_to_ERP'] == 1) {

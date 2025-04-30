@@ -9,14 +9,14 @@ function erpsync_init_fn(){
 
     add_settings_section(
         'main_section', // id
-        'Configuración de sincronización ERP', // title
+        'Configuración de sincronización', // title
         'section_text_fn', // call back that displays the HTML
         'erp-sync'); // page, same as in add_settings_field() and do_settings_section()
       
     // woo to ERP  ********************************************
     add_settings_field(
         'woo_to_ERP',
-        'Woocommerce a ERP sync',
+        'Woocommerce a ERP',
         'woo_to_erp_fn',
         'erp-sync',   // Your existing settings page slug
         'main_section',
@@ -60,22 +60,33 @@ function erpsync_init_fn(){
    //products sync
    add_settings_field(
     'prods sync',
-    'Sincronizar Devoluciones',
+    'Sincronizar Productos',
     'prods_sync_fn',
     'erp-sync',
     'main_section',
     'prods_sync'
   );
 
+  add_settings_field(
+      'api_url', // id api_url
+      'API URL', // title
+      'setting_api_url_fn', // callback
+      'erp-sync', // page
+      'main_section', // section: same as id in add_settings_section()
+      'api_url'
+      // args array
+);
 
-	  add_settings_field(
-        'plugin_text_string', // id
-        'Text Input', // title
-        'setting_string_fn', // callback
-        'erp-sync', // page
-        'main_section' // section: same as id in add_settings_section()
-        // args array
-  ); 
+// working example
+// add_settings_field(
+//   'plugin_text_string', // id
+//   'Text Input', // title
+//   'setting_string_fn', // callback
+//   'erp-sync', // page
+//   'main_section' // section: same as id in add_settings_section()
+//   // args array
+// ); 
+
 	
     add_settings_field('plugin_text_pass', 'Password Text Input', 'setting_pass_fn', 'erp-sync', 'main_section');
     add_settings_field('plugin_textarea_string', 'Large Textbox!', 'setting_textarea_fn', 'erp-sync', 'main_section');
