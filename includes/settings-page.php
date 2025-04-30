@@ -68,31 +68,35 @@ function erpsync_init_fn(){
   );
 
   add_settings_field(
-      'api_url', // id api_url
-      'API URL', // title
-      'setting_api_url_fn', // callback
-      'erp-sync', // page
-      'main_section', // section: same as id in add_settings_section()
-      'api_url'
-      // args array
-);
+    'api url', // id api_url
+    'API URL', // title
+    'setting_api_url_fn', // callback
+    'erp-sync', // page
+    'main_section', // section: same as id in add_settings_section()
+    'api_url'
+    // args array
+  );
 
-// working example
-// add_settings_field(
-//   'plugin_text_string', // id
-//   'Text Input', // title
-//   'setting_string_fn', // callback
-//   'erp-sync', // page
-//   'main_section' // section: same as id in add_settings_section()
-//   // args array
-// ); 
-
-	
-    add_settings_field('plugin_text_pass', 'Password Text Input', 'setting_pass_fn', 'erp-sync', 'main_section');
-    add_settings_field('plugin_textarea_string', 'Large Textbox!', 'setting_textarea_fn', 'erp-sync', 'main_section');
-    add_settings_field('plugin_chk2', 'A Checkbox', 'setting_chk2_fn', 'erp-sync', 'main_section');
-    add_settings_field('radio_buttons', 'Select Shape', 'setting_radio_fn', 'erp-sync', 'main_section');
-    add_settings_field('drop_down1', 'Select Color', 'erpsync_setting_dropdown_fn', 'erp-sync', 'main_section');
+  add_settings_field(
+    'api_key',
+    'API Key',
+    'setting_apikey_fn',
+    'erp-sync',
+    'main_section',
+    'api_key'
+    );
+  // add_settings_field(
+  //   'plugin_text_pass',
+  //   'Password Text Input',
+  //   'setting_pass_fn',
+  //   'erp-sync',
+  //   'main_section'
+  //   );
+  
+  add_settings_field('plugin_textarea_string', 'Large Textbox!', 'setting_textarea_fn', 'erp-sync', 'main_section');
+  add_settings_field('plugin_chk2', 'A Checkbox', 'setting_chk2_fn', 'erp-sync', 'main_section');
+  add_settings_field('radio_buttons', 'Select Shape', 'setting_radio_fn', 'erp-sync', 'main_section');
+  add_settings_field('drop_down1', 'Select Color', 'erpsync_setting_dropdown_fn', 'erp-sync', 'main_section');
 
  
 

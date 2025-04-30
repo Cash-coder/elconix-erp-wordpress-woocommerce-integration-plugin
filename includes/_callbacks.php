@@ -157,14 +157,21 @@ function setting_textarea_fn() {
 // API URL
 function setting_api_url_fn() {
 		$options = get_option('plugin_erpsync');
-		echo "<input id='api_url' name='plugin_erpsync[text_string]' size='40' type='text' value='{$options['text_string']}' />";
+		// echo "<input id='api_url' name='plugin_erpsync[text_string]' size='40' type='text' value='{$options['text_string']}' />";
+		
+		// implement $value here to avoid error when the user hasnt saved the value yet, and therefore doesn't exist in the database yet
+		$value = isset($options['api_url']) ? $options['api_url'] : '';
+		echo "<input id='api_url_txtinput' name='plugin_erpsync[api_url]' size='40' type='text' value='{$options['api_url']}' />";
 	}
 
-// TEXTBOX - Name: plugin_erpsync[text_string]
-// function setting_string_fn() {
-// 	$options = get_option('plugin_erpsync');
-// 	echo "<input id='erpsync_text_string' name='plugin_erpsync[text_string]' size='40' type='text' value='{$options['text_string']}' />";
-// }
+
+// API KEY
+function setting_apikey_fn() {
+	$options = get_option('plugin_erpsync');
+	$value = isset($options['api_key']) ? $options['api_key'] : '';
+	// echo "<input id='erpsync_api_key' name='plugin_erpsync['api_key']' size='40' type='password' value='{$value}' />";
+	echo "<input id='erpsync_api_key' name='plugin_erpsync[api_key]' size='40' type='password' value='{$value}' />";
+}
 
 // PASSWORD-TEXTBOX - Name: plugin_erpsync[pass_string]
 function setting_pass_fn() {
