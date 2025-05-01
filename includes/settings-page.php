@@ -14,6 +14,70 @@ function erpsync_init_fn(){
     'section_text_fn', // call back that displays the HTML
     'erp-sync' // page, same as in add_settings_field() and do_settings_section()
   ); 
+
+  // manual or auto ********************************************
+  add_settings_field(
+    'schedule_mode',
+    'Modo Sincronización',
+    'my_plugin_mode_callback',
+    'erp-sync',
+    'main_section'
+  );  
+
+  add_settings_field(
+    'schedule_time',
+    'Horario Sincronización',
+    'my_plugin_time_callback',
+    'erp-sync',
+    'main_section',
+    ['class' => 'schedule-time-field']
+  );
+
+  // Time field callback
+function my_plugin_time_callback() {
+  $options = get_option('my_plugin_options');
+  $time = isset($options['schedule_time']) ? $options['schedule_time'] : '12:00';
+  ?>
+  <input type="time" id="schedule_time" name="my_plugin_options[schedule_time]" value="<?php echo esc_attr($time); ?>">
+  <?php
+}
+
+// Mode field callback
+function my_plugin_mode_callback() {
+  $options = get_option('my_plugin_options');
+  $mode = isset($options['schedule_mode']) ? $options['schedule_mode'] : 'manual';
+  ?>
+  <select id="schedule_mode" name="my_plugin_options[schedule_mode]">
+      <option value="manual" <?php selected($mode, 'manual'); ?>>Manual</option>
+      <option value="auto" <?php selected($mode, 'auto'); ?>>Auto</option>
+  </select>
+  <?php
+}
+
+// Add admin scripts
+function my_plugin_admin_scripts() {
+  ?>
+  <script>
+  jQuery(document).ready(function($) {
+      function toggleTimeField() {
+          var mode = $('#schedule_mode').val();
+          if (mode === 'auto') {
+              $('.schedule-time-field').show();
+          } else {
+              $('.schedule-time-field').hide();
+          }
+      }
+      
+      // Run on page load
+      toggleTimeField();
+      
+      // Run when select changes
+      $('#schedule_mode').on('change', toggleTimeField);
+  });
+  </script>
+  <?php
+}
+add_action('admin_footer', 'my_plugin_admin_scripts');  
     
   // woo to ERP  ********************************************
   add_settings_field(

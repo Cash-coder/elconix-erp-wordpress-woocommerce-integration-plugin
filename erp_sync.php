@@ -102,7 +102,7 @@ function erpsync_page_fn() {
       <?php settings_fields('plugin_erpsync'); ?>
       <?php do_settings_sections('erp-sync'); ?>
       <p class="submit">
-        <input name="Submit" type="submit" class="button-primary" value="<?php esc_attr_e('Save Changes'); ?>" />
+        <input name="Submit" type="submit" class="button-primary" value="<?php esc_attr_e('Guardar Cambios'); ?>" />
       </p>
       </form>
       <form action="" method="post">
