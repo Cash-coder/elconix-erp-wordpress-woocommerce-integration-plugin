@@ -62,60 +62,6 @@ function add_erpsync_defaults_fn() {
 	}
 }
 
-// add manual sync button
-add_action('admin_init', 'erpsync_handle_manual_sync');
-
-// Handle the sync button submission
-function erpsync_handle_manual_sync() {
-  // Check if our form was submitted
-  if (isset($_POST['erpsync_manual_sync'])) {
-      // Verify the nonce for security
-      if (!isset($_POST['erpsync_nonce']) || !wp_verify_nonce($_POST['erpsync_nonce'], 'erpsync_manual_sync')) {
-          wp_die('Security check failed. Please try again.');
-      }
-      
-      // Check user permissions
-      if (!current_user_can('manage_options')) {
-          wp_die('You do not have sufficient permissions to access this page.');
-      }
-      
-      // Your custom sync code goes here
-      $sync_result = perform_erp_sync();
-      
-      // Set a transient to show a message after redirect
-      set_transient('erpsync_message', $sync_result ? 'Sync successful!' : 'Sync failed!', 60);
-      
-      // Redirect to the same page to prevent form resubmission
-      wp_redirect(add_query_arg('page', 'erp-sync', admin_url('options-general.php')));
-      exit;
-  }
-}
-
-// Display the admin options page
-function erpsync_page_fn() {
-  ?>
-    <div class="wrap">
-      <div class="icon32" id="icon-options-general"><br></div>
-      <h1>Integración Elconix ERP</h1>
-      <!-- Some optional text here explaining the overall purpose of the options and what they relate to etc. -->
-      <form action="options.php" method="post">
-      <?php settings_fields('plugin_erpsync'); ?>
-      <?php do_settings_sections('erp-sync'); ?>
-      <p class="submit">
-        <input name="Submit" type="submit" class="button-primary" value="<?php esc_attr_e('Guardar Cambios'); ?>" />
-      </p>
-      </form>
-      <form action="" method="post">
-        <?php wp_nonce_field('erpsync_manual_sync', 'erpsync_nonce'); ?>
-        <p>
-          <input type="submit" name="erpsync_manual_sync" id="erpsync-button" class="button" value="Sincronizar Ahora" />
-        </p>
-      </form>
-    </div>
-  <?php
-  }
-
-
 // ************************************************************************************************************
 
 // Sync Now Button Handler

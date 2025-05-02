@@ -96,5 +96,5 @@
       toggleSubOptions('woo_to_erp', wooToErpEnabled);
       toggleSubOptions('erp_to_woo', erpToWooEnabled);
   }
-  
+
 })(jQuery);

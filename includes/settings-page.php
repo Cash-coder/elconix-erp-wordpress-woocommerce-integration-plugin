@@ -15,69 +15,30 @@ function erpsync_init_fn(){
     'erp-sync' // page, same as in add_settings_field() and do_settings_section()
   ); 
 
-  // manual or auto ********************************************
+  // sync mode: manual or auto ********************************************
   add_settings_field(
-    'schedule_mode',
+    'schedule_mode', // I'm confused, this seems to be the id key to retrieve from DB table wp_options
     'Modo Sincronización',
-    'my_plugin_mode_callback',
+    'erpsync_mode_fn',
     'erp-sync',
-    'main_section'
+    'main_section',
+    // 'sync_mode'
+    // [
+    //   'label_for' => 'sync_mode'
+    // ]
   );  
 
   add_settings_field(
     'schedule_time',
     'Horario Sincronización',
-    'my_plugin_time_callback',
+    'erpsync_scheduled_time_fn',
     'erp-sync',
     'main_section',
-    ['class' => 'schedule-time-field']
+    [
+      'class' => 'schedule-time-field',
+      'label_for' => 'schedule_time'
+    ]
   );
-
-  // Time field callback
-function my_plugin_time_callback() {
-  $options = get_option('my_plugin_options');
-  $time = isset($options['schedule_time']) ? $options['schedule_time'] : '12:00';
-  ?>
-  <input type="time" id="schedule_time" name="my_plugin_options[schedule_time]" value="<?php echo esc_attr($time); ?>">
-  <?php
-}
-
-// Mode field callback
-function my_plugin_mode_callback() {
-  $options = get_option('my_plugin_options');
-  $mode = isset($options['schedule_mode']) ? $options['schedule_mode'] : 'manual';
-  ?>
-  <select id="schedule_mode" name="my_plugin_options[schedule_mode]">
-      <option value="manual" <?php selected($mode, 'manual'); ?>>Manual</option>
-      <option value="auto" <?php selected($mode, 'auto'); ?>>Auto</option>
-  </select>
-  <?php
-}
-
-// Add admin scripts
-function my_plugin_admin_scripts() {
-  ?>
-  <script>
-  jQuery(document).ready(function($) {
-      function toggleTimeField() {
-          var mode = $('#schedule_mode').val();
-          if (mode === 'auto') {
-              $('.schedule-time-field').show();
-          } else {
-              $('.schedule-time-field').hide();
-          }
-      }
-      
-      // Run on page load
-      toggleTimeField();
-      
-      // Run when select changes
-      $('#schedule_mode').on('change', toggleTimeField);
-  });
-  </script>
-  <?php
-}
-add_action('admin_footer', 'my_plugin_admin_scripts');  
     
   // woo to ERP  ********************************************
   add_settings_field(
@@ -174,9 +135,35 @@ add_action('admin_footer', 'my_plugin_admin_scripts');
 // Validate user data for some/all of your input fields
 function plugin_erpsync_validate($input) {
 	// Check our textbox option field contains no HTML tags - if so strip them out
-	$input['text_string'] =  wp_filter_nohtml_kses($input['text_string']);	
+	
+  // $input['text_string'] =  wp_filter_nohtml_kses($input['text_string']);	
 	return $input; // return validated input
 }
+
+// for sync mode selection
+function my_plugin_admin_scripts() {
+  ?>
+  <script>
+  jQuery(document).ready(function($) {
+      function toggleTimeField() {
+          var mode = $('#schedule_mode').val();
+          if (mode === 'auto') {
+              $('.schedule-time-field').show();
+          } else {
+              $('.schedule-time-field').hide();
+          }
+      }
+      
+      // Run on page load
+      toggleTimeField();
+      
+      // Run when select changes
+      $('#schedule_mode').on('change', toggleTimeField);
+  });
+  </script>
+  <?php
+}
+add_action('admin_footer', 'my_plugin_admin_scripts');  
 
 
  

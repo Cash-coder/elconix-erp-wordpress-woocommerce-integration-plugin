@@ -18,6 +18,103 @@
 // }
 
 
+// Display the admin options page (main page with options)
+function erpsync_page_fn() {
+	?>
+	
+	<!-- if setting sync_mode != manual: hide "Sync Now" button -->
+	<?php 
+		$options = get_option('plugin_erpsync');
+		// "manual" default if syncMode isn't set yet	
+		$sync_mode = isset($options['schedule_mode']) ? $options['schedule_mode'] : 'manual';
+		error_log('### sync mode is ');
+		error_log($sync_mode);
+	?>	
+		<div class="wrap">
+			<div class="icon32" id="icon-options-general"><br></div>
+			<h1>Integración Elconix ERP</h1>
+			<!-- Some optional text here explaining the overall purpose of the options and what they relate to etc. -->
+			<form action="options.php" method="post">
+			<?php settings_fields('plugin_erpsync'); ?>
+			<?php do_settings_sections('erp-sync'); ?>
+			<p class="submit">
+				<input name="Submit" type="submit" class="button-primary" value="<?php esc_attr_e('Guardar Cambios'); ?>" />
+			</p>
+			</form>
+			<!-- show sync now button if manual sync mode is enabled -->
+			<?php if ($sync_mode === 'manual') : ?>
+				<form action="" method="post">
+					<?php wp_nonce_field('erpsync_manual_sync', 'erpsync_nonce'); ?>
+					<p>
+						<input type="submit" name="erpsync_manual_sync" id="erpsync-button" class="button" value="Sincronizar Ahora" />
+					</p>
+				</form>
+			<?php endif; ?>
+		</div>
+	<?php
+}
+
+// add manual sync button
+add_action('admin_init', 'erpsync_handle_manual_sync');
+
+// Handle the sync button submission
+function erpsync_handle_manual_sync() {
+  // Check if our form was submitted
+  if (isset($_POST['erpsync_manual_sync'])) {
+      // Verify the nonce for security
+      if (!isset($_POST['erpsync_nonce']) || !wp_verify_nonce($_POST['erpsync_nonce'], 'erpsync_manual_sync')) {
+          wp_die('Security check failed. Please try again.');
+      }
+      
+      // Check user permissions
+      if (!current_user_can('manage_options')) {
+          wp_die('You do not have sufficient permissions to access this page.');
+      }
+
+      // show button only when manual mode is enabled
+      $options = get_option('plugin_erpsync');
+      if($options['schedule_mode'] === 'manual'){
+        
+				error_log('Detectado boton "Sincronizar Ahora". Modo manual activo. Procediendo con sincronizacion');
+				$sync_result = perform_erp_sync();      
+				
+				// Set a transient to show a message after redirect
+				set_transient('erpsync_message', $sync_result ? 'Sync successful!' : 'Sync failed!', 60);
+	
+				// Redirect to the same page to prevent form resubmission
+				wp_redirect(add_query_arg('page', 'erp-sync', admin_url('options-general.php')));
+				exit;
+      };
+  }
+}
+
+// text line displayed before the first option
+function  section_text_fn() {
+	echo '<p>Seleccione opciones de integración y haga click en <strong>Guardar Cambios</strong>.</p>';
+}
+
+// sync mode: manual or auto ********************************************
+
+// Mode field callback
+function erpsync_mode_fn() {
+  $options = get_option('plugin_erpsync');
+  $mode = isset($options['schedule_mode']) ? $options['schedule_mode'] : 'manual';
+  ?>
+  <select id="schedule_mode" name="plugin_erpsync[schedule_mode]">
+      <option value="manual" <?php selected($mode, 'manual'); ?>>Manual</option>
+      <option value="auto" <?php selected($mode, 'auto'); ?>>Automático</option>
+  </select>
+  <?php
+}
+
+// Time field callback
+function erpsync_scheduled_time_fn() {
+  $options = get_option('plugin_erpsync');
+  $time = isset($options['schedule_time']) ? $options['schedule_time'] : '12:00';
+  ?>
+  <input type="time" id="schedule_time" name="plugin_erpsync[schedule_time]" value="<?php echo esc_attr($time); ?>">
+  <?php
+}
 
 // Woo to ERP *********************************************
 function woo_to_erp_fn() {
@@ -132,24 +229,6 @@ function erp_sync_suboptions_styles() {
 	';
 }
 
-// Section HTML, displayed before the first option
-function  section_text_fn() {
-	echo '<p>Seleccione opciones de integración y haga click en <strong>Guardar Cambios</strong>.</p>';
-}
-
-// DROP-DOWN-BOX - Name: plugin_erpsync[dropdown1]
-function  erpsync_setting_dropdown_fn() {
-	$options = get_option('plugin_erpsync');
-	$items = array("Red", "Green", "Blue", "Orange", "White", "Violet", "Yellow");
-	echo "<select id='drop_down1' name='plugin_erpsync[dropdown1]'>"; // dropdown1 holds the currently selected color.
-	foreach($items as $item) {
-    // name='plugin_erpsync[dropdown1]' → Ensures the selected value is saved in the plugin_erpsync array under the key dropdown1.
-		$selected = ($options['dropdown1']==$item) ? 'selected="selected"' : ''; // Mark as default choice: if saved value matches the current $item
-		echo "<option value='$item' $selected>$item</option>";
-	}
-	echo "</select>";
-}
-
 // API URL
 function setting_api_url_fn() {
 		$options = get_option('plugin_erpsync');
@@ -220,4 +299,17 @@ function setting_apikey_fn() {
 //     $checked = ' checked="checked" '; 
 // 	}
 // 	echo "<input ".$checked." id='erpsync_chk1' name='plugin_erpsync[chkbox1]' type='checkbox' />";
+// }
+
+// // DROP-DOWN-BOX - Name: plugin_erpsync[dropdown1]
+// function  erpsync_setting_dropdown_fn() {
+// 	$options = get_option('plugin_erpsync');
+// 	$items = array("Red", "Green", "Blue", "Orange", "White", "Violet", "Yellow");
+// 	echo "<select id='drop_down1' name='plugin_erpsync[dropdown1]'>"; // dropdown1 holds the currently selected color.
+// 	foreach($items as $item) {
+//     // name='plugin_erpsync[dropdown1]' → Ensures the selected value is saved in the plugin_erpsync array under the key dropdown1.
+// 		$selected = ($options['dropdown1']==$item) ? 'selected="selected"' : ''; // Mark as default choice: if saved value matches the current $item
+// 		echo "<option value='$item' $selected>$item</option>";
+// 	}
+// 	echo "</select>";
 // }
