@@ -5,8 +5,11 @@ function erpsync_init_fn(){
   register_setting(
     'plugin_erpsync', //group name, same as in settings_field()
     'plugin_erpsync', // variable name to store in DB
-    'plugin_erpsync_validate' 
+    'plugin_erpsync_validate' // validation callback
   );
+
+  // run scheduler handler function BEFORE submission of "Guardar Cambios" button
+  add_action('update_option_plugin_erpsync', 'erpsync_scheduler_handler', 10, 3);
 
   add_settings_section(
     'main_section', // id
@@ -112,6 +115,7 @@ function erpsync_init_fn(){
     'main_section',
     'api_key'
   );
+  
   // add_settings_field(
   //   'plugin_text_pass',
   //   'Password Text Input',
@@ -131,6 +135,47 @@ function erpsync_init_fn(){
   );
  
   }
+
+// SCHEDULER HANDLER
+function erpsync_scheduler_handler($old_values, $new_values, $option_name) {
+  // This function will run AFTER click on "Guardar Cambios" button
+  // but BEFORE the page redirects back to the settings page
+  
+  // foreach ($old_value as $value) {
+  //   error_log($value);
+  // }
+  // foreach ($new_value as $value) {
+  //   error_log($value);
+  // }
+
+  $old_value = $old_values['schedule_mode'];
+  $new_value = $new_values['schedule_mode'];
+
+  // error_log('Sync Mode changes: old: ' . $old_value . ' | new: ' . $new_value);
+
+  // if the schedule settings were changed
+  if ($new_value !== $old_value) {
+    error_log('Sync Mode change detected, changed from mode ' . $old_value . ', to mode ' . $new_value);
+
+    // trigger the un/schedule action fn
+    // if changed from manual to auto: schedule a new action
+    if ($old_value == 'manual' && $new_value == 'auto') {
+      
+      error_log('scheduling new action');
+      erpsync_schedule_action($new_value, 'schedule_new_action');
+
+    }
+
+    // if changed from auto to manual: remove old scheduled action
+    // one fn with argument add schedule,time or remove schedule,T
+  }
+  
+}
+
+function erpsync_schedule_action($mode, $action) {
+  error_log('action is ' . $action);
+}
+
 
 // Validate user data for some/all of your input fields
 function plugin_erpsync_validate($input) {

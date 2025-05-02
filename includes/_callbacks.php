@@ -27,8 +27,9 @@ function erpsync_page_fn() {
 		$options = get_option('plugin_erpsync');
 		// "manual" default if syncMode isn't set yet	
 		$sync_mode = isset($options['schedule_mode']) ? $options['schedule_mode'] : 'manual';
-		error_log('### sync mode is ');
-		error_log($sync_mode);
+		if ($sync_mode == 'auto') {
+			error_log('new sync mode is ' . $sync_mode . '. NOT rendering "Sincronizar Ahora" button');			
+		}
 	?>	
 		<div class="wrap">
 			<div class="icon32" id="icon-options-general"><br></div>
