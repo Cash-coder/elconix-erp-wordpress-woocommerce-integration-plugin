@@ -136,47 +136,6 @@ function erpsync_init_fn(){
  
   }
 
-// SCHEDULER HANDLER
-function erpsync_scheduler_handler($old_values, $new_values, $option_name) {
-  // This function will run AFTER click on "Guardar Cambios" button
-  // but BEFORE the page redirects back to the settings page
-  
-  // foreach ($old_value as $value) {
-  //   error_log($value);
-  // }
-  // foreach ($new_value as $value) {
-  //   error_log($value);
-  // }
-
-  $old_value = $old_values['schedule_mode'];
-  $new_value = $new_values['schedule_mode'];
-
-  // error_log('Sync Mode changes: old: ' . $old_value . ' | new: ' . $new_value);
-
-  // if the schedule settings were changed
-  if ($new_value !== $old_value) {
-    error_log('Sync Mode change detected, changed from mode ' . $old_value . ', to mode ' . $new_value);
-
-    // trigger the un/schedule action fn
-    // if changed from manual to auto: schedule a new action
-    if ($old_value == 'manual' && $new_value == 'auto') {
-      
-      error_log('scheduling new action');
-      erpsync_schedule_action($new_value, 'schedule_new_action');
-
-    }
-
-    // if changed from auto to manual: remove old scheduled action
-    // one fn with argument add schedule,time or remove schedule,T
-  }
-  
-}
-
-function erpsync_schedule_action($mode, $action) {
-  error_log('action is ' . $action);
-}
-
-
 // Validate user data for some/all of your input fields
 function plugin_erpsync_validate($input) {
 	// Check our textbox option field contains no HTML tags - if so strip them out
@@ -211,7 +170,6 @@ function my_plugin_admin_scripts() {
 add_action('admin_footer', 'my_plugin_admin_scripts');  
 
 
- 
 // SAMPLE FIELDS *********************
 // add_settings_field('plugin_textarea_string', 'Large Textbox!', 'setting_textarea_fn', 'erp-sync', 'main_section');
 // add_settings_field('plugin_chk2', 'A Checkbox', 'setting_chk2_fn', 'erp-sync', 'main_section');

@@ -7,13 +7,14 @@
  */
 
 // Define plugin constants
+// define('ERP_SYNC_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('ERP_SYNC_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('ERP_SYNC_PLUGIN_URL', plugin_dir_url(__FILE__));
 
 // Include other pages
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/_callbacks.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/settings-page.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync-logic.php';
+require_once ERP_SYNC_PLUGIN_DIR . 'includes/erpsync_action_scheduler.php';
 
 // Specify Hooks/Filters
 register_activation_hook('erp-sync', 'add_erpsync_defaults_fn');
