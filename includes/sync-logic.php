@@ -81,3 +81,5 @@ function execute_erp_sync_via_action_scheduler($source = '') {
   // Optional: Log that the sync was executed
   error_log('ERP Sync executed via Action Scheduler at ' . date('Y-m-d H:i:s') . ' Source: ' . $source);
 }
+
+}
