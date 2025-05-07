@@ -6,6 +6,10 @@ function perform_erp_sync() {
   
   $options = get_option('plugin_erpsync');
 
+  // check license, return license_error if not response != 200
+  $license_key = $options['license_key'];
+  error_log($license_key);
+
   // foreach ($options as $option) {error_log($option);}
   error_log($options['schedule_mode']);
   error_log($options['schedule_time']);
