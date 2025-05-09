@@ -18,30 +18,6 @@ function erpsync_init_fn(){
     'erp-sync' // page, same as in add_settings_field() and do_settings_section()
   ); 
 
-  // sync mode: manual or auto ********************************************
-  add_settings_field(
-    'schedule_mode', // I'm confused, this seems to be the id key to retrieve from DB table wp_options
-    'Modo Sincronización',
-    'erpsync_mode_fn',
-    'erp-sync',
-    'main_section',
-    // 'sync_mode'
-    // [
-    //   'label_for' => 'sync_mode'
-    // ]
-  );  
-
-  add_settings_field(
-    'schedule_time',
-    'Horario Sincronización',
-    'erpsync_scheduled_time_fn',
-    'erp-sync',
-    'main_section',
-    [
-      'class' => 'schedule-time-field',
-      'label_for' => 'schedule_time'
-    ]
-  );
     
   // woo to ERP  ********************************************
   add_settings_field(
@@ -51,6 +27,32 @@ function erpsync_init_fn(){
     'erp-sync',   // Your existing settings page slug
     'main_section',
     ['label_for' => 'woo_to_ERP'] // Target key in options array
+  );
+
+  // sync mode: manual or auto for woo to ERP
+  add_settings_field(
+    'schedule_mode_wooToErp', // I'm confused, this seems to be the id key to retrieve from DB table wp_options
+    'Modo Sincronización',
+    'erpsync_syncmode_wooto_erp_fn',
+    'erp-sync',
+    'main_section',
+    // 'sync_mode'
+    [
+      'label_for' => 'schedule_mode_wooToErp'
+    ]
+  ); 
+
+  // manual time setting option for woo to ERP
+  add_settings_field(
+    'schedule_time_wooToErp',
+    'Horario Sincronización',
+    'erpsync_scheduled_time_wooToErp_fn',
+    'erp-sync',
+    'main_section',
+    [
+      'class' => 'schedule-time-field-wooToErp',
+      'label_for' => 'schedule_time_wooToErp' 
+    ]
   );
 
   // orders sync
@@ -87,6 +89,32 @@ function erpsync_init_fn(){
     ['label_for' => 'erp_to_woo'] // Target key in options array
   );
 
+  // sync mode: manual or auto for erp to woo
+  add_settings_field(
+    'schedule_mode_erpToWoo', // I'm confused, this seems to be the id key to retrieve from DB table wp_options
+    'Modo Sincronización',
+    'erpsync_syncmode_erpToWoo_fn',
+    'erp-sync',
+    'main_section',
+    // 'sync_mode'
+    [
+      'label_for' => 'schedule_mode_erpToWoo'
+    ]
+  ); 
+  
+  // manual time setting option for erp to woo
+  add_settings_field(
+    'schedule_time_erpToWoo',
+    'Horario Sincronización',
+    'erpsync_scheduled_time_erpToWoo_fn',
+    'erp-sync',
+    'main_section',
+    [
+      'class' => 'schedule-time-field-erpToWoo',
+      'label_for' => 'schedule_time_erpToWoo' 
+    ]
+  );
+
   //products sync
   add_settings_field(
     'prods sync',
@@ -97,6 +125,7 @@ function erpsync_init_fn(){
     'prods_sync'
   );
 
+  // ERP API URL
   add_settings_field(
     'api url', // id api_url
     'API URL', // title
@@ -107,6 +136,7 @@ function erpsync_init_fn(){
     // args array
   );
 
+  // ERP API key
   add_settings_field(
     'api_key',
     'API Key',
@@ -124,6 +154,7 @@ function erpsync_init_fn(){
   //   'main_section'
   //   );
 
+  // License
   add_settings_field(
     'license key', // id api_url
     'Clave de Licencia', // title
@@ -144,30 +175,55 @@ function plugin_erpsync_validate($input) {
 	return $input; // return validated input
 }
 
-// for sync mode selection
-function my_plugin_admin_scripts() {
+// wooToErp show/hide time field if sync mode is auto/manual
+function time_schedule_wooToErp_input() {
   ?>
   <script>
   jQuery(document).ready(function($) {
-      function toggleTimeField() {
-          var mode = $('#schedule_mode').val();
+      function toggleWooToErpTimeField() {
+          var mode = $('#schedule_mode_wooToErp').val();
           if (mode === 'auto') {
-              $('.schedule-time-field').show();
+              $('.schedule-time-field-wooToErp').show();
           } else {
-              $('.schedule-time-field').hide();
+              $('.schedule-time-field-wooToErp').hide();
           }
       }
       
       // Run on page load
-      toggleTimeField();
+      toggleWooToErpTimeField();
       
       // Run when select changes
-      $('#schedule_mode').on('change', toggleTimeField);
+      $('#schedule_mode_wooToErp').on('change', toggleWooToErpTimeField);
   });
   </script>
   <?php
 }
-add_action('admin_footer', 'my_plugin_admin_scripts');  
+add_action('admin_footer', 'time_schedule_wooToErp_input');  
+
+// ErpToWoo show/hide time field if sync mode is auto/manual
+function time_schedule_erpToWoo_input() {
+  ?>
+  <script>
+  jQuery(document).ready(function($) {
+      function toggleErpToWooTimeField() {
+          var mode = $('#schedule_mode_erpToWoo').val();
+          if (mode === 'auto') {
+              $('.schedule-time-field-erpToWoo').show();
+          } else {
+              $('.schedule-time-field-erpToWoo').hide();
+          }
+      }
+      
+      // Run on page load
+      toggleErpToWooTimeField();
+      
+      // Run when select changes
+      $('#schedule_mode_erpToWoo').on('change', toggleErpToWooTimeField);
+  });
+  </script>
+  <?php
+}
+add_action('admin_footer', 'time_schedule_erpToWoo_input');  
 
 
 // SAMPLE FIELDS *********************

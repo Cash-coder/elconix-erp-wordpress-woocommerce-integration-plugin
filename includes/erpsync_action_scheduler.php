@@ -12,8 +12,8 @@ function erpsync_scheduler_handler($old_values, $new_values, $option_name) {
   //   error_log($value);
   // }
 
-  $old_value = $old_values['schedule_mode'];
-  $new_value = $new_values['schedule_mode'];
+  $old_value = $old_values['schedule_mode_wooToErp'];
+  $new_value = $new_values['schedule_mode_wooToErp'];
 
   // error_log('Sync Mode changes: old: ' . $old_value . ' | new: ' . $new_value);
 
@@ -67,9 +67,13 @@ function erpsync_schedule_action($mode, $action) {
       $next_run,       // When to first run
       10, // DAY_IN_SECONDS,   // How often to rerun (daily); interval in seconds
       'perform_erp_sync'  // The hook to execute
-    );  
+    );
+    
+    
 
     error_log('scheduled action with id: ' . $action_id . ' | time now: ' . time() . ' | scheduled time: ' . $next_run);
+    $options = get_option('plugin_erpsync');
+    error_log( 'XXXX ' . $options['schedule_time_wooToErp']);
 
   // Enqueue an action to run one time, as soon as possible.
   // $id = as_enqueue_async_action('perform_erp_sync');

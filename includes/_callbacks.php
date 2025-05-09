@@ -26,7 +26,7 @@ function erpsync_page_fn() {
 	<?php 
 		$options = get_option('plugin_erpsync');
 		// "manual" default if syncMode isn't set yet	
-		$sync_mode = isset($options['schedule_mode']) ? $options['schedule_mode'] : 'manual';
+		$sync_mode = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
 		if ($sync_mode == 'auto') {
 			error_log('new sync mode is ' . $sync_mode . '. NOT rendering "Sincronizar Ahora" button');			
 		}
@@ -74,7 +74,7 @@ function erpsync_handle_manual_sync() {
 
       // show button only when manual mode is enabled
       $options = get_option('plugin_erpsync');
-      if($options['schedule_mode'] === 'manual'){
+      if($options['schedule_mode_wooToErp'] === 'manual'){
         
 				error_log('Detectado boton "Sincronizar Ahora". Modo manual activo. Procediendo con sincronizacion');
 				$sync_result = perform_erp_sync();      
@@ -96,24 +96,45 @@ function  section_text_fn() {
 
 // sync mode: manual or auto ********************************************
 
-// Mode field callback
-function erpsync_mode_fn() {
+// Sync Mode field callback woo to ERP
+function erpsync_syncmode_wooto_erp_fn() {
   $options = get_option('plugin_erpsync');
-  $mode = isset($options['schedule_mode']) ? $options['schedule_mode'] : 'manual';
+  $mode = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
   ?>
-  <select id="schedule_mode" name="plugin_erpsync[schedule_mode]">
+  <select id="schedule_mode_wooToErp" name="plugin_erpsync[schedule_mode_wooToErp]">
       <option value="manual" <?php selected($mode, 'manual'); ?>>Manual</option>
       <option value="auto" <?php selected($mode, 'auto'); ?>>Automático</option>
   </select>
   <?php
 }
 
-// Time field callback
-function erpsync_scheduled_time_fn() {
+// Time field callback wooToERP
+function erpsync_scheduled_time_wooToErp_fn() {
   $options = get_option('plugin_erpsync');
-  $time = isset($options['schedule_time']) ? $options['schedule_time'] : '12:00';
+  $time = isset($options['schedule_time_wooToErp']) ? $options['schedule_time_wooToErp'] : '12:00';
   ?>
-  <input type="time" id="schedule_time" name="plugin_erpsync[schedule_time]" value="<?php echo esc_attr($time); ?>">
+  <input type="time" id="schedule_time_wooToErp" name="plugin_erpsync[schedule_time_wooToErp]" value="<?php echo esc_attr($time); ?>">
+  <?php
+}
+
+// Sync Mode field callback ERP to woo 
+function erpsync_syncmode_erpToWoo_fn() {
+  $options = get_option('plugin_erpsync');
+  $mode = isset($options['schedule_mode_erpToWoo']) ? $options['schedule_mode_erpToWoo'] : 'manual';
+  ?>
+  <select id="schedule_mode_erpToWoo" name="plugin_erpsync[schedule_mode_erpToWoo]">
+      <option value="manual" <?php selected($mode, 'manual'); ?>>Manual</option>
+      <option value="auto" <?php selected($mode, 'auto'); ?>>Automático</option>
+  </select>
+  <?php
+}
+
+// Time field callback erptoWoo
+function erpsync_scheduled_time_erpToWoo_fn() {
+  $options = get_option('plugin_erpsync');
+  $time = isset($options['schedule_time_erpToWoo']) ? $options['schedule_time_erpToWoo'] : '12:00';
+  ?>
+  <input type="time" id="schedule_time_erpToWoo" name="plugin_erpsync[schedule_time_erpToWoo]" value="<?php echo esc_attr($time); ?>">
   <?php
 }
 

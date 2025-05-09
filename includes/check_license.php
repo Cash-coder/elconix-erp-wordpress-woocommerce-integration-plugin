@@ -49,21 +49,22 @@ function check_license($license_code) {
             return true;
         } elseif (isset($response_body['status']) && $response_body['status'] === false) {
             error_log('License is INVALID');
+            
             // Set the error flag
             $_SESSION['license_error'] = true;
 
-            error_log( 'page is '. $_GET['page']);
             return false;
         }
     }
     
-    // Default to error
+    // Default to showing error message
     $_SESSION['license_error'] = true;
     return false;
 }
 
 // This function will run on every admin page
 function display_license_error() {
+    // if license_error true and page is erp-sync, show error message
     if (current_user_can('manage_options') && isset($_SESSION['license_error']) && $_SESSION['license_error'] === true && isset($_GET['page']) && $_GET['page'] === 'erp-sync') {
         ?>
         <div class="notice notice-error is-dismissible">
