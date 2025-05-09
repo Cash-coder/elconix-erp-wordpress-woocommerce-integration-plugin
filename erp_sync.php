@@ -16,6 +16,7 @@ require_once ERP_SYNC_PLUGIN_DIR . 'includes/settings-page.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync-logic.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/erpsync_action_scheduler.php';
 
+
 // Specify Hooks/Filters
 register_activation_hook('erp-sync', 'add_erpsync_defaults_fn');
 add_action('admin_init', 'erpsync_init_fn' );

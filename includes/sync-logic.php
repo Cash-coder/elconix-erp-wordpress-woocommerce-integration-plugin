@@ -1,14 +1,42 @@
 <?php
 
+require_once ERP_SYNC_PLUGIN_DIR . 'includes/check_license.php';
+
 // Sync function
 function perform_erp_sync() {
   error_log('------------running sync------------');
   
   $options = get_option('plugin_erpsync');
 
-  // check license, return license_error if not response != 200
+  // get license key
   $license_key = $options['license_key'];
-  error_log($license_key);
+  error_log('license key provided by the user is : ' . $license_key);
+
+  // Check license validity,if wrong: error message + stop func
+  // if (!check_license($license_key)) {
+  //   // Show error message to user
+  //   // echo '<div class="error"><p>Invalid license. Please check your license key.</p></div>';
+  //   add_action('admin_notices', function() {
+  //     echo '<div class="notice notice-error"><p>Invalid license. Please check your license key.</p></div>';
+  //   });
+  //   error_log('license key invalid, sync function stopped');
+  //   return false;
+  // }
+
+  // Check license validity, if wrong: error message + stop func
+  if (!check_license($license_key)) {
+    // Show error message to user
+    // add_action('admin_notices', function() {
+    //   echo '<div class="notice notice-error is-dismissible"><p>Invalid license. Please check your license key.</p></div>';
+    // });
+    // $message = 'Licencia de Plugin invalida';
+    // echo "<script type='text/javascript'>alert('$message');</script>";
+      $message = "Your comment has been submitted";
+      echo "<script type='text/javascript'>alert('$message');</script>";
+
+    error_log('license key invalid, sync function stopped');
+    return false;
+  }
 
   // foreach ($options as $option) {error_log($option);}
   error_log($options['schedule_mode']);
