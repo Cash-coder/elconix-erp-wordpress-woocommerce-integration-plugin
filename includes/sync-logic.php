@@ -14,29 +14,28 @@ function perform_erp_sync() {
 
   // Check license validity, if wrong: error message + stop func + exit func
   if (!check_license($license_key)) {
-    $message = "Your comment has been submitted";
-    echo "<script type='text/javascript'>alert('$message');</script>";
+    // $message = "Your comment has been submitted";
+    // echo "<script type='text/javascript'>alert('$message');</script>";
 
     error_log('license key invalid, sync function stopped');
     return false;
   }
 
   // foreach ($options as $option) {error_log($option);}
+
   error_log(
     'Sync mode for Woo to ERP is ' 
     . $options['schedule_mode_wooToErp'] 
-    . ' | Sync auto sync time set at: '
+    . ' | auto sync time set at: '
     . $options['schedule_time_wooToErp']
   );
 
   error_log(
     'Sync mode for ERP to Woo is ' 
     . $options['schedule_mode_erpToWoo'] 
-    . ' | Sync auto sync time set at: '
+    . ' | auto sync time set at: '
     . $options['schedule_time_erpToWoo']
   );
-
-
   
   // if woo to ERP sync is enabled   ********************************
   if (isset($options['woo_to_ERP']) && $options['woo_to_ERP'] == 1) {

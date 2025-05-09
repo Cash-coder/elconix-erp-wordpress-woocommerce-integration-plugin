@@ -26,10 +26,15 @@ function erpsync_page_fn() {
 	<?php 
 		$options = get_option('plugin_erpsync');
 		// "manual" default if syncMode isn't set yet	
-		$sync_mode = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
-		if ($sync_mode == 'auto') {
-			error_log('new sync mode is ' . $sync_mode . '. NOT rendering "Sincronizar Ahora" button');			
-		}
+		// $sync_mode = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
+		// if ($sync_mode == 'auto') {
+		// 	error_log('new sync mode is ' . $sync_mode . '. NOT rendering "Sincronizar Ahora" button');			
+		// }
+		$sync_mode_wooToErp = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
+		$sync_mode_erpToWoo = isset($options['schedule_mode_erpToWoo']) ? $options['schedule_mode_erpToWoo'] : 'manual';
+
+		//manual sync is enabled in at least one direction
+		$is_manual_sync_enabled = ($sync_mode_wooToErp === 'manual') || ($sync_mode_erpToWoo === 'manual');
 	?>	
 		<div class="wrap">
 			<div class="icon32" id="icon-options-general"><br></div>
@@ -43,7 +48,7 @@ function erpsync_page_fn() {
 			</p>
 			</form>
 			<!-- show sync now button if manual sync mode is enabled -->
-			<?php if ($sync_mode === 'manual') : ?>
+			<?php if ($is_manual_sync_enabled) : ?>
 				<form action="" method="post">
 					<?php wp_nonce_field('erpsync_manual_sync', 'erpsync_nonce'); ?>
 					<p>
