@@ -51,6 +51,8 @@ function check_license($license_code) {
             error_log('License is INVALID');
             // Set the error flag
             $_SESSION['license_error'] = true;
+
+            error_log( 'page is '. $_GET['page']);
             return false;
         }
     }
@@ -62,7 +64,7 @@ function check_license($license_code) {
 
 // This function will run on every admin page
 function display_license_error() {
-    if (current_user_can('manage_options') && isset($_SESSION['license_error']) && $_SESSION['license_error'] === true) {
+    if (current_user_can('manage_options') && isset($_SESSION['license_error']) && $_SESSION['license_error'] === true && isset($_GET['page']) && $_GET['page'] === 'erp-sync') {
         ?>
         <div class="notice notice-error is-dismissible">
             <p><strong>Error:</strong> Clave de Licencia Inválida.</p>
