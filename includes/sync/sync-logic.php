@@ -1,6 +1,7 @@
 <?php
 
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/check_license.php';
+require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/sync_erp_to_woo.php';
 
 // Sync function
 function perform_erp_sync() {
@@ -14,9 +15,6 @@ function perform_erp_sync() {
 
   // Check license validity, if wrong: error message + stop func + exit func
   if (!check_license($license_key)) {
-    // $message = "Your comment has been submitted";
-    // echo "<script type='text/javascript'>alert('$message');</script>";
-
     error_log('license key invalid, sync function stopped');
     return false;
   }
@@ -50,6 +48,17 @@ function perform_erp_sync() {
   // if ERP to woo sync is enabled   ********************************
   if (isset($options['erp_to_woo']) && $options['erp_to_woo'] == 1) {
     error_log('ERP to Woo enabled');
+
+    // if prod sync is enabled
+    if (isset($options['prods_sync'])) { // && $options['orders_sync'] == 1) {
+      error_log('orders sync enabled');
+      
+      //
+      // sync_test();
+      // ERPSync::sync_test()
+      ERPtoWoo::sync_test($options);
+    }
+
   }
 
   error_log('**************** Sync End ****************');
@@ -104,7 +113,7 @@ add_action('perform_erp_sync_hook', 'execute_erp_sync_via_action_scheduler', 10,
 function execute_erp_sync_via_action_scheduler($source = '') {
   // Include your sync logic file if needed
   if (!function_exists('perform_erp_sync')) {
-      include_once(WP_PLUGIN_DIR . '/ERP-Sync/includes/sync-logic.php');
+      include_once(WP_PLUGIN_DIR . '/ERP-Sync/includes/sync/sync-logic.php');
   }
   
   // Call your sync function

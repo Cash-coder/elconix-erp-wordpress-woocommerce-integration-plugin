@@ -33,7 +33,7 @@ function erpsync_page_fn() {
 		$sync_mode_wooToErp = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
 		$sync_mode_erpToWoo = isset($options['schedule_mode_erpToWoo']) ? $options['schedule_mode_erpToWoo'] : 'manual';
 
-		//manual sync is enabled in at least one direction
+		//manual sync is enabled in at least one direction. Used to show or hide "Sync Now" button
 		$is_manual_sync_enabled = ($sync_mode_wooToErp === 'manual') || ($sync_mode_erpToWoo === 'manual');
 	?>	
 		<div class="wrap">

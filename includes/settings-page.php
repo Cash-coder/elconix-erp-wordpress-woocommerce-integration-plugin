@@ -122,7 +122,7 @@ function erpsync_init_fn(){
     'prods_sync_fn',
     'erp-sync',
     'main_section',
-    'prods_sync'
+    'prods_sync' 
   );
 
   // ERP API URL

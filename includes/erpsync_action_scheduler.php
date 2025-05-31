@@ -69,8 +69,6 @@ function erpsync_schedule_action($mode, $action) {
       'perform_erp_sync'  // The hook to execute
     );
     
-    
-
     error_log('scheduled action with id: ' . $action_id . ' | time now: ' . time() . ' | scheduled time: ' . $next_run);
     $options = get_option('plugin_erpsync');
     error_log( 'XXXX ' . $options['schedule_time_wooToErp']);
@@ -90,7 +88,7 @@ function perform_erp_sync_callback() {
   if (function_exists('perform_erp_sync')) {
       perform_erp_sync();
   } else {
-      include_once(WP_PLUGIN_DIR . '/ERP-Sync/includes/sync-logic.php');
+      include_once(WP_PLUGIN_DIR . '/ERP-Sync/includes/sync/sync-logic.php');
       perform_erp_sync();
   }
 }

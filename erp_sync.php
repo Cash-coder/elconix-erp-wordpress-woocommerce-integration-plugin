@@ -13,7 +13,7 @@ define('ERP_SYNC_PLUGIN_DIR', plugin_dir_path(__FILE__));
 // Include other pages
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/_callbacks.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/settings-page.php';
-require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync-logic.php';
+require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/sync-logic.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/erpsync_action_scheduler.php';
 
 
