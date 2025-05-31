@@ -12,13 +12,11 @@ if (!session_id()) {
 }
 
 function check_license($license_code) {
-    // API endpoint
     $api_url = 'https://api.codigo6.com/api/activate_license';
-    
-    // Get the client's IP address
     $client_ip = $_SERVER['REMOTE_ADDR'];
+    $max_retries = 3;
+    $attempt = 1;
     
-    // request arguments
     $args = [
         'body' => json_encode([
             'verify_type' => 'non_envato',
@@ -32,32 +30,50 @@ function check_license($license_code) {
             'LB-IP' => $client_ip,
             'LB-LANG' => 'english',
             'Content-Type' => 'application/json'
-        ]
+        ],
+        'timeout' => 15
     ];
     
-    // request and print response
-    $response = wp_remote_post($api_url, $args);
-    $response_body = json_decode(wp_remote_retrieve_body($response), true);
-    error_log('License API response: ' . print_r($response_body, true));
-    
-    // Check if response is valid and has status code 200
-    if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) == 200) {
+    while ($attempt <= $max_retries) {
+        error_log("License check attempt {$attempt}/{$max_retries}");
+        $response = wp_remote_post($api_url, $args);
+        
+        // Connection failed
+        if (is_wp_error($response)) {
+            error_log("Connection error, retrying...");
+            if ($attempt < $max_retries) sleep(2);
+            $attempt++;
+            continue;
+        }
+        
+        // Got API response
+        $response_body = json_decode(wp_remote_retrieve_body($response), true);
+        
+        // Valid license
         if (isset($response_body['status']) && $response_body['status'] === true) {
             error_log('License is valid');
-            // Clear any error flag
             $_SESSION['license_error'] = false;
             return true;
-        } elseif (isset($response_body['status']) && $response_body['status'] === false) {
-            error_log('License is INVALID');
-            
-            // Set the error flag
-            $_SESSION['license_error'] = true;
-
-            return false;
         }
+        // Invalid license
+        elseif (isset($response_body['status']) && $response_body['status'] === false) {
+            if ($attempt < $max_retries) {
+                error_log("License invalid, retry attempt {$attempt}");
+                sleep(2);
+                $attempt++;
+                continue;
+            } else {
+                error_log('License is INVALID (final attempt)');
+                $_SESSION['license_error'] = true;
+                return false;
+            }
+        }
+        
+        // Invalid response format
+        $attempt++;
     }
     
-    // Default to showing error message
+    error_log('License check failed after ' . $max_retries . ' attempts');
     $_SESSION['license_error'] = true;
     return false;
 }

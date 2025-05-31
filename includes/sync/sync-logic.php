@@ -2,10 +2,16 @@
 
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/check_license.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/sync_erp_to_woo.php';
+require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
 
 // Sync function
 function perform_erp_sync() {
   error_log('------------running sync------------');
+
+  set_transient('erp_sync_notice', [
+    'type' => 'success', // or 'error'/'warning'/'info'
+    'message' => 'ERP sync completed successfully!'
+  ], 45);
   
   $options = get_option('plugin_erpsync');
 
@@ -60,6 +66,9 @@ function perform_erp_sync() {
     }
 
   }
+  
+  // UserNotice::transient_error('test error');
+  // show_message('**************** test error');
 
   error_log('**************** Sync End ****************');
 
@@ -124,3 +133,14 @@ function execute_erp_sync_via_action_scheduler($source = '') {
 }
 
 }
+
+
+
+add_action('admin_notices', function() {  
+if ($notice = get_transient('erp_sync_notice')) {
+    echo '<div class="notice notice-'.esc_attr($notice['type']).' is-dismissible">
+        <p>'.esc_html($notice['message']).'</p>
+    </div>';
+    delete_transient('erp_sync_notice');
+}
+});

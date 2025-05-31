@@ -1,6 +1,6 @@
 <?php
 
-require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/user_notice.php';
+require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
 
 class ERPtoWoo {
     public static function sync_test($options) {

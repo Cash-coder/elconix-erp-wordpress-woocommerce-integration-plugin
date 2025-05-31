@@ -36,7 +36,7 @@ class UserNotice {
 
   public static function transient_error($error){
     // When error occurs:
-    set_transient('erp_api_error', $response, 30); // Stores for 30 seconds
+    set_transient('erp_api_error', $error, 30); // Stores for 30 seconds
 
     // Then display wherever needed (e.g., in admin notices):
     if ($error = get_transient('erp_api_error')) {
@@ -46,6 +46,7 @@ class UserNotice {
         delete_transient('erp_api_error');
     }
   }
+
   public static function api_error($response) {
     error_log('ERPtoWoo sync: Invalid API response - ' . print_r($response, true));
     echo '<div class="api-error-notice">
