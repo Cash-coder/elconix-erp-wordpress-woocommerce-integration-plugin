@@ -3,43 +3,56 @@
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
 
 class ERPtoWoo {
-    public static function sync_test($options) {
+  public static function sync_test($options) {
+   
+    $decoded_data = self::get_products($options);
 
-        $api_key = $options['api_key'];
-        $api_url = $options['api_url'];
-
-        $decoded_data = self::get_products($options);
-
-        // Use the data
-        if ( $decoded_data ) {
-          // log the prods
-          if (isset($decoded_data['products'])) {
-            UserNotice::print_all_products($decoded_data, $stock=false);
-            
-            // import products
-            $products = array_slice($decoded_data['products'],0, 6);
-            foreach ($products as $product) {
-              self::create_woo_product($product);
-            }
-          }
-        } else {
-          self::log_message('no JSON decoded data available');
-        }
+    // if products
+    if ( $decoded_data ) {
+      if (isset($decoded_data['products'])) {
+        UserNotice::print_all_products($decoded_data, $stock=false);
+        self::import_products($decoded_data['products']);
+      }
+    } else {
+      self::log('no JSON decoded data available');
+      return false;
     }
 
-    private static function create_woo_product($product_data) {
-      try {
-          $product = new WC_Product_Simple();
-          $product->set_name($product_data['Producto']['Nombre'] ?? '');
-          $product->set_sku($product_data['Producto']['Item_Number'] ?? '');
-          $product->set_regular_price($product_data['Producto']['Precio_Venta'] ?? 1);
-          self::log_message($product->save());
-          return true;
-      } catch (Exception $e) {
-          self::log_message("Product creation failed: " . $e->getMessage());
-          return false;
-      }
+    //success
+    return true;
   }
+
+  private static function import_products($products) {
+    // import products    
+    $total_count = 0;
+    $success_count = 0;
+    
+    $products = array_slice($products, 0, 6);
+    foreach ($products as $product) {
+      $total_count ++;
+      $response = self::create_woo_product($product);
+      
+      // count success/total
+      if ($response) $success_count++ ;
+    }
+    self::log('Importados con éxito ' . $success_count . '/' . $total_count . ' productos.');
+    UserNotice::admin_notice_message('success' ,'Importados con éxito ' . $success_count . '/' . $total_count . ' productos.');
+    sleep(5);
+  }
+
+  private static function create_woo_product($product_data) {
+    try {
+        $product = new WC_Product_Simple();
+        $product->set_name($product_data['Producto']['Nombre'] ?? '');
+        $product->set_sku($product_data['Producto']['Item_Number'] ?? '');
+        $product->set_regular_price($product_data['Producto']['Precio_Venta'] ?? 1);
+        self::log($product->save());
+        return true;
+    } catch (Exception $e) {
+        self::log("Product creation failed: " . $e->getMessage());
+        return false;
+    }
+}
 
   private static function get_products($options) {
 
@@ -64,21 +77,25 @@ class ERPtoWoo {
     
     // Make the request
     $response = wp_remote_post( $options['api_url'], $args );
+    $response_code = wp_remote_retrieve_response_code($response);
+    $response_body = wp_remote_retrieve_body($response);
+
+    // Handle HTTP errors (4xx, 5xx)
+    if ($response_code >= 400) {
+      self::log("ERP API Error ($response_code): " . $response_body);
+      
+      if ($response_code = 400)   {
+        UserNotice::admin_notice_message('error', 'Error 404: La URL de la API no existe');
+      } elseif ($response_code = 500){
+        UserNotice::admin_notice_message('error', 'Error 500 en la API');
+      }
+      return false;
+    } 
     
     // Check if WP_Error (e.g., timeout, connection failed)
     if (is_wp_error($response)) {
-      self::log_message('API ERROR: ' . $response->get_error_message());
-      
-      // UserNotice::api_error($response);
-      set_transient('erp_api_error', $response, 30); // Stores for 30 seconds
-
-      // Then display wherever needed (e.g., in admin notices):
-      if ($error = get_transient('erp_api_error')) {
-          echo '<div class="notice notice-error is-dismissible">
-                  <pre>'.esc_html(print_r($error, true)).'</pre>
-                </div>';
-          delete_transient('erp_api_error');
-      }
+      self::log('API/WP ERROR: ' . $response->get_error_message());
+      return false;
     } 
     // Otherwise, log the full response (including body, headers, status)
     else {
@@ -90,7 +107,7 @@ class ERPtoWoo {
   }
 
   // Utility function for logging
-  private static function log_message($message) {
-    error_log("[ERPtoWoo] " . $message);
+  private static function log($message) {
+    UserNotice::log_message( '[ERPtoWoo] ' . $message);
   }
 }

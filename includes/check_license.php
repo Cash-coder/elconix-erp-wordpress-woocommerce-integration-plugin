@@ -7,9 +7,9 @@
  */
 
 // fix bug invalid license message not rendering
-if (!session_id()) {
-    session_start();
-}
+// if (!session_id()) {
+//     session_start();
+// }
 
 function check_license($license_code) {
     $api_url = 'https://api.codigo6.com/api/activate_license';
@@ -52,7 +52,7 @@ function check_license($license_code) {
         // Valid license
         if (isset($response_body['status']) && $response_body['status'] === true) {
             error_log('License is valid');
-            $_SESSION['license_error'] = false;
+            // $_SESSION['license_error'] = false;
             return true;
         }
         // Invalid license
@@ -64,7 +64,7 @@ function check_license($license_code) {
                 continue;
             } else {
                 error_log('License is INVALID (final attempt)');
-                $_SESSION['license_error'] = true;
+                // $_SESSION['license_error'] = true;
                 return false;
             }
         }
@@ -74,7 +74,7 @@ function check_license($license_code) {
     }
     
     error_log('License check failed after ' . $max_retries . ' attempts');
-    $_SESSION['license_error'] = true;
+    // $_SESSION['license_error'] = true;
     return false;
 }
 

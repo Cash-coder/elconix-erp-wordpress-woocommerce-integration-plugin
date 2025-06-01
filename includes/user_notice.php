@@ -1,5 +1,16 @@
-di<?php
+<?php
 class UserNotice {
+
+  public static function log_message($message) {
+    error_log($message);
+  }
+
+  public static function admin_notice_message($type, $message){
+    set_transient('erp_sync_notice', [
+      'type' => $type, //success/'error'/'warning'/'info'
+      'message' => $message
+    ], 45);
+  }
   
   public static function print_all_products($decoded_data, $stock=false){
       foreach ($decoded_data['products'] as $product) {

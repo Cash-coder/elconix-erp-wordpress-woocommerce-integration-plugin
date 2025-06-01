@@ -15,6 +15,7 @@ require_once ERP_SYNC_PLUGIN_DIR . 'includes/_callbacks.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/settings-page.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/sync-logic.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/erpsync_action_scheduler.php';
+// require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
 
 
 // Specify Hooks/Filters

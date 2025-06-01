@@ -7,11 +7,6 @@ require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
 // Sync function
 function perform_erp_sync() {
   error_log('------------running sync------------');
-
-  set_transient('erp_sync_notice', [
-    'type' => 'success', // or 'error'/'warning'/'info'
-    'message' => 'ERP sync completed successfully!'
-  ], 45);
   
   $options = get_option('plugin_erpsync');
 
@@ -22,6 +17,7 @@ function perform_erp_sync() {
   // Check license validity, if wrong: error message + stop func + exit func
   if (!check_license($license_key)) {
     error_log('license key invalid, sync function stopped');
+    UserNotice::admin_notice_message('error', 'Clave de licencia inválida');
     return false;
   }
 
@@ -58,18 +54,18 @@ function perform_erp_sync() {
     // if prod sync is enabled
     if (isset($options['prods_sync'])) { // && $options['orders_sync'] == 1) {
       error_log('orders sync enabled');
-      
-      //
-      // sync_test();
-      // ERPSync::sync_test()
-      ERPtoWoo::sync_test($options);
+     
+      $response = ERPtoWoo::sync_test($options);
+      // if error
+      if (!$response) {
+        return false;
+      }
     }
 
   }
-  
-  // UserNotice::transient_error('test error');
-  // show_message('**************** test error');
 
+  // UserNotice::admin_notice_message('success', 'Sincronización completada con éxio');
+  
   error_log('**************** Sync End ****************');
 
   return true;
@@ -133,7 +129,6 @@ function execute_erp_sync_via_action_scheduler($source = '') {
 }
 
 }
-
 
 
 add_action('admin_notices', function() {  
