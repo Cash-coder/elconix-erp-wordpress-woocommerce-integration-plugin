@@ -6,31 +6,43 @@ require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
 
 // Sync function
 function perform_erp_sync() {
-  error_log('------------running sync------------');
+  logger('------------ Sync Start ------------');
+
+  echo '
+    <script>
+    jQuery(".wrap").prepend(\'<div class="notice notice-info"><p>🔄 Sync in progress</p></div>\');
+    </script>
+    <div class="notice notice-info"><p>🔄 Sync in progress</p></div>
+    ';  
+
+    if (ob_get_level() > 0) {
+      ob_flush();
+      flush();
+    }
   
   $options = get_option('plugin_erpsync');
 
   // get license key
   $license_key = $options['license_key'];
-  error_log('license key provided by the user is : ' . $license_key);
+  logger('license key provided by the user is : ' . $license_key);
 
   // Check license validity, if wrong: error message + stop func + exit func
-  if (!check_license($license_key)) {
-    error_log('license key invalid, sync function stopped');
+  if (!License::check_license($license_key)) {
+    logger('license key invalid, sync function stopped');
     UserNotice::admin_notice_message('error', 'Clave de licencia inválida');
     return false;
   }
 
-  // foreach ($options as $option) {error_log($option);}
+  // foreach ($options as $option) {logger($option);}
 
-  error_log(
+  logger(
     'Sync mode for Woo to ERP is ' 
     . $options['schedule_mode_wooToErp'] 
     . ' | auto sync time set at: '
     . $options['schedule_time_wooToErp']
   );
 
-  error_log(
+  logger(
     'Sync mode for ERP to Woo is ' 
     . $options['schedule_mode_erpToWoo'] 
     . ' | auto sync time set at: '
@@ -39,21 +51,21 @@ function perform_erp_sync() {
   
   // if woo to ERP sync is enabled   ********************************
   if (isset($options['woo_to_ERP']) && $options['woo_to_ERP'] == 1) {
-    error_log('woo to ERP enabled');
+    logger('woo to ERP enabled');
 
     // if orders sync is enabled
     if (isset($options['orders_sync'])) { // && $options['orders_sync'] == 1) {
-      error_log('orders sync enabled');
+      logger('orders sync enabled');
     }
   } 
 
   // if ERP to woo sync is enabled   ********************************
   if (isset($options['erp_to_woo']) && $options['erp_to_woo'] == 1) {
-    error_log('ERP to Woo enabled');
+    logger('ERP to Woo enabled');
 
     // if prod sync is enabled
     if (isset($options['prods_sync'])) { // && $options['orders_sync'] == 1) {
-      error_log('orders sync enabled');
+      logger('orders sync enabled');
      
       $response = ERPtoWoo::sync_test($options);
       // if error
@@ -66,7 +78,7 @@ function perform_erp_sync() {
 
   UserNotice::admin_notice_message('success', 'Sincronización completada con éxio');
   
-  error_log('**************** Sync End ****************');
+  logger('**************** Sync End ****************');
 
   return true;
 
@@ -125,10 +137,16 @@ function execute_erp_sync_via_action_scheduler($source = '') {
   perform_erp_sync();
   
   // Optional: Log that the sync was executed
-  error_log('ERP Sync executed via Action Scheduler at ' . date('Y-m-d H:i:s') . ' Source: ' . $source);
+  logger('ERP Sync executed via Action Scheduler at ' . date('Y-m-d H:i:s') . ' Source: ' . $source);
 }
 
 }
+
+// Utility function for logging
+function logger($message) {
+  UserNotice::log_message( '[sync-logic] ' . $message);
+}
+
 
 
 // add_action('admin_notices', function() {  
@@ -139,3 +157,5 @@ function execute_erp_sync_via_action_scheduler($source = '') {
 //     delete_transient('erp_sync_notice');
 // }
 // });
+
+

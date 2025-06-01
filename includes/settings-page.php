@@ -18,7 +18,6 @@ function erpsync_init_fn(){
     'erp-sync' // page, same as in add_settings_field() and do_settings_section()
   ); 
 
-    
   // woo to ERP  ********************************************
   add_settings_field(
     'woo_to_ERP',
@@ -175,55 +174,6 @@ function plugin_erpsync_validate($input) {
 	return $input; // return validated input
 }
 
-// wooToErp show/hide time field if sync mode is auto/manual
-function time_schedule_wooToErp_input() {
-  ?>
-  <script>
-  jQuery(document).ready(function($) {
-      function toggleWooToErpTimeField() {
-          var mode = $('#schedule_mode_wooToErp').val();
-          if (mode === 'auto') {
-              $('.schedule-time-field-wooToErp').show();
-          } else {
-              $('.schedule-time-field-wooToErp').hide();
-          }
-      }
-      
-      // Run on page load
-      toggleWooToErpTimeField();
-      
-      // Run when select changes
-      $('#schedule_mode_wooToErp').on('change', toggleWooToErpTimeField);
-  });
-  </script>
-  <?php
-}
-add_action('admin_footer', 'time_schedule_wooToErp_input');  
-
-// ErpToWoo show/hide time field if sync mode is auto/manual
-function time_schedule_erpToWoo_input() {
-  ?>
-  <script>
-  jQuery(document).ready(function($) {
-      function toggleErpToWooTimeField() {
-          var mode = $('#schedule_mode_erpToWoo').val();
-          if (mode === 'auto') {
-              $('.schedule-time-field-erpToWoo').show();
-          } else {
-              $('.schedule-time-field-erpToWoo').hide();
-          }
-      }
-      
-      // Run on page load
-      toggleErpToWooTimeField();
-      
-      // Run when select changes
-      $('#schedule_mode_erpToWoo').on('change', toggleErpToWooTimeField);
-  });
-  </script>
-  <?php
-}
-add_action('admin_footer', 'time_schedule_erpToWoo_input');  
 
 
 // SAMPLE FIELDS *********************

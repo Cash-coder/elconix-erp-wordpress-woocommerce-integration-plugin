@@ -1,27 +1,7 @@
 <?php
-
-// enqueue CSS
-// add_action('admin_enqueue_scripts', 'erp_sync_admin_styles');
-
-// function erp_sync_admin_styles($hook) {
-    // Only load on your plugin's settings page
-    // error_log('aaa');
-    // error_log($hook);
-		// if ('settings_page_erp-sync' === $hook) {
-        // wp_enqueue_style(
-        //     'erp-sync-admin-css',
-        //     plugins_url('css/admin.css', __FILE__),
-        //     array(),
-            // filetime(plugin_dir_path(__FILE__) . 'css/admin.css')
-        // );
-    // }
-// }
-
-
 // Display the admin options page (main page with options)
 function erpsync_page_fn() {
-	?>
-	
+	?>	
 	<!-- if setting sync_mode != manual: hide "Sync Now" button -->
 	<?php 
 		$options = get_option('plugin_erpsync');
@@ -282,6 +262,123 @@ function setting_apikey_fn() {
 	// echo "<input id='erpsync_api_key' name='plugin_erpsync['api_key']' size='40' type='password' value='{$value}' />";
 	echo "<input id='erpsync_api_key' name='plugin_erpsync[api_key]' size='40' type='password' value='{$value}' />";
 }
+
+// wooToErp show/hide time field if sync mode is auto/manual
+function time_schedule_wooToErp_input() {
+  ?>
+  <script>
+  jQuery(document).ready(function($) {
+      function toggleWooToErpTimeField() {
+          var mode = $('#schedule_mode_wooToErp').val();
+          if (mode === 'auto') {
+              $('.schedule-time-field-wooToErp').show();
+          } else {
+              $('.schedule-time-field-wooToErp').hide();
+          }
+      }
+      
+      // Run on page load
+      toggleWooToErpTimeField();
+      
+      // Run when select changes
+      $('#schedule_mode_wooToErp').on('change', toggleWooToErpTimeField);
+  });
+  </script>
+  <?php
+}
+add_action('admin_footer', 'time_schedule_wooToErp_input');  
+
+// ErpToWoo show/hide time field if sync mode is auto/manual
+function time_schedule_erpToWoo_input() {
+  ?>
+  <script>
+  jQuery(document).ready(function($) {
+      function toggleErpToWooTimeField() {
+          var mode = $('#schedule_mode_erpToWoo').val();
+          if (mode === 'auto') {
+              $('.schedule-time-field-erpToWoo').show();
+          } else {
+              $('.schedule-time-field-erpToWoo').hide();
+          }
+      }
+      
+      // Run on page load
+      toggleErpToWooTimeField();
+      
+      // Run when select changes
+      $('#schedule_mode_erpToWoo').on('change', toggleErpToWooTimeField);
+  });
+  </script>
+  <?php
+}
+add_action('admin_footer', 'time_schedule_erpToWoo_input');  
+
+// show progress message to the user
+function erp_sync_progress_handler() {
+  ?>
+  <script>
+  jQuery(document).ready(function($) {
+      // Show processing message
+      // function showSyncProgress() {
+      //     $('#erpsync-button')
+			// 			.after('<div 
+			// 				id="sync-progress" 
+			// 				style="margin-top:10px; color:#0073aa;"
+			// 				>🔄 Sincronización en progreso ...
+			// 				</div>');
+      // }
+
+			function showSyncProgress() {
+			$('#erpsync-button').after(`
+				<div id="sync-progress" style="
+					margin-top: 15px;
+					padding: 15px;
+					width: 30%;
+					background: #f8f9f9;
+					border-left: 4px solid #0073aa;
+					border-radius: 3px;
+					font-size: 15px;
+					font-weight: 500;
+					display: flex;
+					align-items: center;
+					gap: 12px;
+					box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+				">
+					<svg width="24" height="24" viewBox="0 0 24 24" style="animation: spin 1s linear infinite;">
+							<path fill="#0073aa" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46A7.93 7.93 0 0020 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74A7.93 7.93 0 004 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+					</svg>
+					<span>Sincronización en progreso...</span>
+				</div>
+			`);
+    
+			// Add spin animation
+			$('<style>')
+				.prop('type', 'text/css')
+				.html('@keyframes spin { 100% { transform: rotate(360deg); } }')
+				.appendTo('head');
+			}
+      
+      // Hide processing message
+      function hideSyncProgress() {
+          $('#sync-progress').remove();
+          $('#erpsync-button').prop('disabled', false);
+      }
+      
+      // Trigger on form submission, not button click
+      $('#erpsync-button').closest('form').on('submit', function() {
+          showSyncProgress();
+          // $('#erpsync-button').prop('disabled', true);
+      });
+      
+      // Make functions globally accessible for PHP triggers
+      window.showSyncProgress = showSyncProgress;
+      window.hideSyncProgress = hideSyncProgress;
+  });
+  </script>
+  <?php
+}
+add_action('admin_footer', 'erp_sync_progress_handler');
+
 
 // SAMPLE CALLBACKS *************************
 

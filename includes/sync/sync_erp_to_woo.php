@@ -10,11 +10,11 @@ class ERPtoWoo {
     // if products
     if ( $decoded_data ) {
       if (isset($decoded_data['products'])) {
-        UserNotice::print_all_products($decoded_data, $stock=false);
+        // UserNotice::print_all_products($decoded_data, $stock=false);
         self::import_products($decoded_data['products']);
       }
     } else {
-      self::log('no JSON decoded data available');
+      self::logger('no JSON decoded data available');
       return false;
     }
 
@@ -35,9 +35,9 @@ class ERPtoWoo {
       // count success/total
       if ($response) $success_count++ ;
     }
-    self::log('Importados con éxito ' . $success_count . '/' . $total_count . ' productos.');
+    self::logger('Importados con éxito ' . $success_count . '/' . $total_count . ' productos.');
     UserNotice::admin_notice_message('success' ,'Importados con éxito ' . $success_count . '/' . $total_count . ' productos.');
-    // sleep(5);
+    sleep(5);
   }
 
   private static function create_woo_product($product_data) {
@@ -46,10 +46,10 @@ class ERPtoWoo {
         $product->set_name($product_data['Producto']['Nombre'] ?? '');
         $product->set_sku($product_data['Producto']['Item_Number'] ?? '');
         $product->set_regular_price($product_data['Producto']['Precio_Venta'] ?? 1);
-        self::log($product->save());
+        self::logger($product->save());
         return true;
     } catch (Exception $e) {
-        self::log("Product creation failed: " . $e->getMessage());
+        self::logger("Product creation failed: " . $e->getMessage());
         return false;
     }
 }
@@ -82,12 +82,12 @@ class ERPtoWoo {
 
     // Handle HTTP errors (4xx, 5xx)
     if ($response_code >= 400) {
-      self::log("ERP API Error ($response_code): " . $response_body);
+      self::logger("ERP API Error ($response_code): " . $response_body);
       
       if ($response_code === 404)   {
         UserNotice::admin_notice_message('error', 'Error 404: La URL de la API no existe');
       } elseif ($response_code === 401) {
-        UserNotice::admin_notice_message('error', 'Error 401: API Key inválida');
+        UserNotice::admin_notice_message('error', 'Error 401: Acceso no Autorizado. API Key o IP inválida');
       } elseif ($response_code === 500){
         UserNotice::admin_notice_message('error', 'Error 500 en la API');
       }
@@ -97,12 +97,12 @@ class ERPtoWoo {
     
     // Check if WP_Error (e.g., timeout, connection failed)
     if (is_wp_error($response)) {
-      self::log('API/WP ERROR: ' . $response->get_error_message());
+      self::logger('API/WP ERROR: ' . $response->get_error_message());
       return false;
     } 
     // Otherwise, log the full response (including body, headers, status)
     else {
-      // error_log('API RESPONSE: ' . print_r($response, true));
+      // logger('API RESPONSE: ' . print_r($response, true));
     }
     
     return json_decode(wp_remote_retrieve_body($response), true);
@@ -110,7 +110,7 @@ class ERPtoWoo {
   }
 
   // Utility function for logging
-  private static function log($message) {
+  private static function logger($message) {
     UserNotice::log_message( '[ERPtoWoo] ' . $message);
   }
 }
