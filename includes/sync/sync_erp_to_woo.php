@@ -84,11 +84,14 @@ class ERPtoWoo {
     if ($response_code >= 400) {
       self::log("ERP API Error ($response_code): " . $response_body);
       
-      if ($response_code = 400)   {
+      if ($response_code === 404)   {
         UserNotice::admin_notice_message('error', 'Error 404: La URL de la API no existe');
-      } elseif ($response_code = 500){
+      } elseif ($response_code === 401) {
+        UserNotice::admin_notice_message('error', 'Error 401: API Key inválida');
+      } elseif ($response_code === 500){
         UserNotice::admin_notice_message('error', 'Error 500 en la API');
       }
+      
       return false;
     } 
     

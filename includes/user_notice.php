@@ -6,6 +6,8 @@ class UserNotice {
   }
 
   public static function admin_notice_message($type, $message){
+    
+    // single notice
     // set_transient('erp_sync_notice', [
     //   'type' => $type, //success/'error'/'warning'/'info'
     //   'message' => $message
@@ -120,5 +122,4 @@ class UserNotice {
 
 
 // Hook into admin notices
-// add_action('admin_notices', [__CLASS__, 'display_admin_notices']);
 add_action('admin_notices', ['UserNotice', 'display_admin_notices']);
