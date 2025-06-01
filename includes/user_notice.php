@@ -6,10 +6,22 @@ class UserNotice {
   }
 
   public static function admin_notice_message($type, $message){
-    set_transient('erp_sync_notice', [
-      'type' => $type, //success/'error'/'warning'/'info'
-      'message' => $message
-    ], 45);
+    // set_transient('erp_sync_notice', [
+    //   'type' => $type, //success/'error'/'warning'/'info'
+    //   'message' => $message
+    // ], 45);
+
+    // Get existing notices (if any)
+    $notices = get_transient('erp_sync_notice') ?: [];
+
+    // Append the new notice
+    $notices[] = [
+        'type'    => $type, // 'success'/'error'/'warning'/'info'
+        'message' => $message
+    ];
+
+    // Save back to transient (expires in 45 seconds)
+    set_transient('erp_sync_notice', $notices, 45);
   }
   
   public static function print_all_products($decoded_data, $stock=false){
@@ -88,4 +100,25 @@ class UserNotice {
   public static function show_progress($response) {
     echo '<div class="user_notice>USER NOTICE></div>';
   }
+  public static function display_admin_notices() {
+    $notices = get_transient('erp_sync_notice');
+  
+    if (!empty($notices)) {
+        foreach ($notices as $notice) {
+            printf(
+                '<div class="notice notice-%s is-dismissible"><p>%s</p></div>',
+                esc_attr($notice['type']),
+                esc_html($notice['message'])
+            );
+        }
+  
+        // Clear after displaying
+        delete_transient('erp_sync_notice');
+    }
+  }
 }
+
+
+// Hook into admin notices
+// add_action('admin_notices', [__CLASS__, 'display_admin_notices']);
+add_action('admin_notices', ['UserNotice', 'display_admin_notices']);

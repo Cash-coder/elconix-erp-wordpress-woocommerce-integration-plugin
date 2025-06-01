@@ -64,7 +64,7 @@ function perform_erp_sync() {
 
   }
 
-  // UserNotice::admin_notice_message('success', 'Sincronización completada con éxio');
+  UserNotice::admin_notice_message('success', 'Sincronización completada con éxio');
   
   error_log('**************** Sync End ****************');
 
@@ -131,11 +131,11 @@ function execute_erp_sync_via_action_scheduler($source = '') {
 }
 
 
-add_action('admin_notices', function() {  
-if ($notice = get_transient('erp_sync_notice')) {
-    echo '<div class="notice notice-'.esc_attr($notice['type']).' is-dismissible">
-        <p>'.esc_html($notice['message']).'</p>
-    </div>';
-    delete_transient('erp_sync_notice');
-}
-});
+// add_action('admin_notices', function() {  
+// if ($notice = get_transient('erp_sync_notice')) {
+//     echo '<div class="notice notice-'.esc_attr($notice['type']).' is-dismissible">
+//         <p>'.esc_html($notice['message']).'</p>
+//     </div>';
+//     delete_transient('erp_sync_notice');
+// }
+// });
