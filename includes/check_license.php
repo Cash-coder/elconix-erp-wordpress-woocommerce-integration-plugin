@@ -34,7 +34,7 @@ class License {
         ];
         
         while ($attempt <= $max_retries) {
-            self::logger("License check attempt {$attempt}/{$max_retries}");
+            self::logger("Checking License, attempt number: {$attempt}/{$max_retries}");
             $response = wp_remote_post($api_url, $args);
             
             // Connection failed
