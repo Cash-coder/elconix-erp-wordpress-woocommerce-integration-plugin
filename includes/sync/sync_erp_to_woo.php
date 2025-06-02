@@ -7,14 +7,14 @@ class ERPtoWoo {
    
     $decoded_data = self::get_products($options);
 
-    // if products
+    // import all products
     if ( $decoded_data ) {
       if (isset($decoded_data['products'])) {
         // UserNotice::print_all_products($decoded_data, $stock=false);
         self::import_products($decoded_data['products']);
       }
     } else {
-      self::logger('no JSON decoded data available');
+      self::logger('no products available or JSON decoded data available');
       return false;
     }
 
@@ -37,7 +37,6 @@ class ERPtoWoo {
     }
     self::logger('Importados con éxito ' . $success_count . '/' . $total_count . ' productos.');
     UserNotice::admin_notice_message('success' ,'Importados con éxito ' . $success_count . '/' . $total_count . ' productos.');
-    sleep(5);
   }
 
   private static function create_woo_product($product_data) {
