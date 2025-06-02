@@ -10,19 +10,18 @@ function perform_erp_sync() {
   logger('------------ Sync Start ------------');
   
   $options = get_option('plugin_erpsync');
+  // foreach ($options as $option) {logger($option);}
 
   // get license key
   $license_key = $options['license_key'];
-  logger('license key provided by the user is : ' . $license_key);
+  logger('License key provided by the user is : ' . $license_key);
 
-  // Check license validity, if wrong: error message + stop func + exit func
+  // Check license validity, if wrong: error message + exit func
   if (!License::check_license($license_key)) {
     logger('license key invalid, sync function stopped');
     UserNotice::admin_notice_message('error', 'Clave de licencia inválida');
     return false;
   }
-
-  // foreach ($options as $option) {logger($option);}
 
   logger(
     'Sync mode for Woo to ERP is ' 
@@ -56,8 +55,10 @@ function perform_erp_sync() {
     if (isset($options['prods_sync'])) { // && $options['orders_sync'] == 1) {
       logger('product sync enabled');
       
-      logger('sync prods by id:');
-      $response_by_id = ImportById::import();
+
+      // if import_by_id is active it will import ONLY those products
+      // logger('sync prods by id:');
+      // $response_by_id = ImportById::import();
       
       $response = ERPtoWoo::sync_test($options);
       // if error
