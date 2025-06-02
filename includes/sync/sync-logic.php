@@ -3,22 +3,11 @@
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/check_license.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/sync_erp_to_woo.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
+require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/import_by_id.php';
 
 // Sync function
 function perform_erp_sync() {
   logger('------------ Sync Start ------------');
-
-  echo '
-    <script>
-    jQuery(".wrap").prepend(\'<div class="notice notice-info"><p>🔄 Sync in progress</p></div>\');
-    </script>
-    <div class="notice notice-info"><p>🔄 Sync in progress</p></div>
-    ';  
-
-    if (ob_get_level() > 0) {
-      ob_flush();
-      flush();
-    }
   
   $options = get_option('plugin_erpsync');
 
@@ -65,8 +54,11 @@ function perform_erp_sync() {
 
     // if prod sync is enabled
     if (isset($options['prods_sync'])) { // && $options['orders_sync'] == 1) {
-      logger('orders sync enabled');
-     
+      logger('product sync enabled');
+      
+      logger('sync prods by id:');
+      $response_by_id = ImportById::import();
+      
       $response = ERPtoWoo::sync_test($options);
       // if error
       if (!$response) {

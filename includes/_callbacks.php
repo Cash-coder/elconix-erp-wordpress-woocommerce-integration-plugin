@@ -170,11 +170,33 @@ function erp_to_woo_fn() {
 function prods_sync_fn() {
 	$options = get_option('plugin_erpsync');
 	$checked = isset($options['prods_sync']) ? 'checked' : '';
-	// $checked= '';
 	if(isset($options['prods_sync']) && $options['prods_sync']) { 
     $checked = ' checked="checked" '; 
 	}
 	echo "<input ".$checked." id='returns_chk' name='plugin_erpsync[prods_sync]' type='checkbox' />";
+}
+
+function import_products_by_id_fn() {
+	$options = get_option('plugin_erpsync');
+	
+	// Implement $value with proper fallback
+	$value = isset($options['product_import_by_id']) ? esc_attr($options['product_import_by_id']) : '';
+	
+	// Output the textarea with inline CSS
+	echo "<textarea 
+					id='product_import_by_id_id' 
+					name='plugin_erpsync[product_import_by_id]' 
+					rows='4' 
+					style='
+							width: 60%;
+							min-height: 100px;
+							max-height: 200px;
+							overflow-y: auto;
+							padding: 8px;
+							box-sizing: border-box;
+							font-family: inherit;
+							font-size: 14px;
+					'>{$value}</textarea>";
 }
 
 // CSS
@@ -251,7 +273,7 @@ function setting_license_key_fn() {
 	$id = 'license_key';
 	$options = get_option('plugin_erpsync');
 	// echo "<input id='api_url' name='plugin_erpsync[text_string]' size='40' type='text' value='{$options['text_string']}' />";		
-	$value = isset($options[$id]) ? $options[$id] : 'Introduzca sare	Clave de Licencia Plugin';
+	$value = isset($options[$id]) ? $options[$id] : 'Introduzca la Clave de Licencia Plugin';
 	echo "<input id='api_url_txtinput' name='plugin_erpsync[$id]' size='40' type='text' value='{$value}' />";
 }
 

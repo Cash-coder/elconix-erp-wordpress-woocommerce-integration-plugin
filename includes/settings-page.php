@@ -124,6 +124,17 @@ function erpsync_init_fn(){
     'prods_sync' 
   );
 
+  // License
+  add_settings_field(
+    'product_import_by_id', // id api_url
+    'Importar productos por ID: (separados por comas)', // title
+    'import_products_by_id_fn', // callback
+    'erp-sync', // page
+    'main_section', // section: same as id in add_settings_section()
+    // 'license_key'
+    // args array
+  );
+
   // ERP API URL
   add_settings_field(
     'api url', // id api_url
@@ -152,8 +163,8 @@ function erpsync_init_fn(){
   //   'erp-sync',
   //   'main_section'
   //   );
-
-  // License
+ 
+  // import prods by id
   add_settings_field(
     'license key', // id api_url
     'Clave de Licencia', // title
@@ -164,7 +175,10 @@ function erpsync_init_fn(){
     // args array
   );
  
+
   }
+
+
 
 // Validate user data for some/all of your input fields
 function plugin_erpsync_validate($input) {
