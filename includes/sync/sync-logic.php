@@ -23,6 +23,14 @@ function perform_erp_sync() {
     return false;
   }
 
+  // Test connection with erp 
+  $connection_test = ERPtoWoo::erp_test_connection($options);
+  if ($connection_test['error']) {
+    logger('http error, ending process');
+    UserNotice::admin_notice_message('error',$connection_test['message']);
+    return false;    
+  }
+
   logger(
     'Sync mode for Woo to ERP is ' 
     . $options['schedule_mode_wooToErp'] 

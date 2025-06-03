@@ -25,36 +25,38 @@ class ImportById {
         'id'   => $id,
       ];
 
-      $response = ERPtoWoo::make_erp_request($request_body, $options);
+      $erp_response = ERPtoWoo::make_erp_request($request_body, $options);
       // check error, notice, stop
       // if ($response[0] == 'error') {
-        if (isset($response['error']) && $response['error']) {
+      //   if (isset($response['error']) && $response['error']) {
         
-        //if its a timeout, continue
-        if (strpos($response['error'], 'Timeout') !== false ) {
-          continue;
-        } else {
+      //   //if its a timeout, continue
+      //   if (strpos($response['error'], 'Timeout') !== false ) {
+      //     continue;
+      //   } else {
           
-          // notice message to user
-          UserNotice::admin_notice_message('error', $response['error']);
+      //     // notice message to user
+      //     UserNotice::admin_notice_message('error', $response['error']);
           
-          //stop execution
-          return false;
-        }
-      }
+      //     //stop execution
+      //     return false;
+      //   }
+      // }
       
-      if ( $response ) {
-        if (isset($response['products'])) {
-          $response = ERPtoWoo::create_woo_product($response['products'][0]);
+      if ( $erp_response ) {
+        if (isset($erp_response['products'])) {
+          $woo_response = ERPtoWoo::create_woo_product($erp_response['products'][0]);
+          // if no error, success +1
+          if ($woo_response) $success_count++;
+
+          continue;
         }
       } else {
-        self::logger('no products available or JSON decoded data available');
+        self::logger('no products available or no JSON decoded data available from response');
+        
         continue;
       }  
-      
-      // if no error, success +1
-      if ($response) $success_count++;
-    }
+    } // end foreach
 
     // admin notice "importados x/y productos"
     UserNotice::admin_notice_message('success', 'Importados con éxito ' . $success_count . '/' . $total_count . ' productos');
