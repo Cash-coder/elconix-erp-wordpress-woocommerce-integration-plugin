@@ -91,14 +91,15 @@ class ERPtoWoo {
       // Make the request
       $response = wp_remote_post( $options['api_url'], $args );
       // self::logger('raw response: ' . print_r($response, true));
-      self::logger('response: ' . $response[1]);
+      self::logger('response: ' . $response['response']['code']);
       // check for errors
       $errors = self::erp_check_wp_errors($response);
       // self::logger('wp errors: ' . $errors);
 
       // return result if all is fine,
       if (!$errors) {
-        return json_decode(wp_remote_retrieve_body($response), true);
+        // return json_decode(wp_remote_retrieve_body($response), true);
+        return $response;
       }      
     }
     
@@ -168,10 +169,12 @@ class ERPtoWoo {
     
     // make request, get Response Code and body
     $response = self::make_erp_request($request_body, $options);
+    // self::logger('from erp_test_connection, response: ' . $response['response']);
 
     $wp_error = self::erp_check_wp_errors($response);
 
-    $response_code = wp_remote_retrieve_response_code($response);
+    // $response_code = wp_remote_retrieve_response_code($response);
+    $response_code = $response['response']['code'];
     $response_body = wp_remote_retrieve_body($response);
 
     self::logger(
