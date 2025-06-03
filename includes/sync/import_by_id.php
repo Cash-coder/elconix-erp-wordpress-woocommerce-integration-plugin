@@ -12,6 +12,9 @@ class ImportById {
     // transform from comma separated values into a list
     $ids = array_map('trim', explode(',', $ids));
 
+    $total_count = count($ids);
+    $success_count = 0;
+
     foreach ($ids as $id) {
       self::logger('Importing ID: ' . $id);
 
@@ -22,17 +25,39 @@ class ImportById {
         'id'   => $id,
       ];
 
-      $decoded_data = ERPtoWoo::make_erp_request($request_body, $options);
+      $response = ERPtoWoo::make_erp_request($request_body, $options);
+      // check error, notice, stop
+      // if ($response[0] == 'error') {
+        if (isset($response['error']) && $response['error']) {
+        
+        //if its a timeout, continue
+        if (strpos($response['error'], 'Timeout') !== false ) {
+          continue;
+        } else {
+          
+          // notice message to user
+          UserNotice::admin_notice_message('error', $response['error']);
+          
+          //stop execution
+          return false;
+        }
+      }
       
-      if ( $decoded_data ) {
-        if (isset($decoded_data['products'])) {
-          $response = ERPtoWoo::create_woo_product($decoded_data['products'][0]);
+      if ( $response ) {
+        if (isset($response['products'])) {
+          $response = ERPtoWoo::create_woo_product($response['products'][0]);
         }
       } else {
         self::logger('no products available or JSON decoded data available');
         continue;
-      }    
+      }  
+      
+      // if no error, success +1
+      if ($response) $success_count++;
     }
+
+    // admin notice "importados x/y productos"
+    UserNotice::admin_notice_message('success', 'Importados con éxito ' . $success_count . '/' . $total_count . ' productos');
 
     // success
     return true;    

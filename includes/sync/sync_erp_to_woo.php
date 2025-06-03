@@ -17,29 +17,28 @@ class ERPtoWoo {
         return false;
       }
     }
-
-    // set one body or other 
     
-    // get products
+    // set body of request to get all products
     $request_body = [
       'class'  => 'GET',
       'action' => 'products',
       'page'   => '1',
     ];
     
-    $decoded_data = self::make_erp_request($request_body, $options);
+    $response = self::make_erp_request($request_body, $options);
+    // if error,handle error, notice, stop
+    
 
     // import all products
-    if ( $decoded_data ) {
-      if (isset($decoded_data['products'])) {
-        // UserNotice::print_all_products($decoded_data, $stock=false);
-        self::import_all_erp_products($decoded_data['products']);
+    if ( $response ) {
+      if (isset($response['products'])) {
+        // UserNotice::print_all_products($response, $stock=false);
+        self::import_all_erp_products($response['products']);
       }
     } else {
       self::logger('no products available or JSON decoded data available');
       return false;
     }
-
     //success
     return true;
   }
@@ -61,13 +60,6 @@ class ERPtoWoo {
     UserNotice::admin_notice_message('success' ,'Importados con éxito ' . $success_count . '/' . $total_count . ' productos.');
   }
 
-  public static function import_erp_single_product($product) {
-
-    $response = self::create_woo_product($product);
-      
-    self::logger('Importados con éxito ' . $success_count . '/' . $total_count . ' productos.');
-  }
-
   public static function create_woo_product($product_data) {
     try {
         $product = new WC_Product_Simple();
@@ -86,83 +78,84 @@ class ERPtoWoo {
 
     $args = self::set_api_args($body, $options['api_key']);
 
-    // attempt 3 times to make the request
-    $max_attempts = 3;
-    $attempt = 1;
+    // attempt x times to make the request
+    $max_attempts = 2;
+    $attempt = 0;
 
     while ($attempt <= $max_attempts) { 
       
-      self::logger('Product Request Attempt number: ' . $attempt);
+      $attempt++;
+
+      self::logger('Product Request Attempt number: ' . $attempt . '/' . $max_attempts);
 
       // Make the request
       $response = wp_remote_post( $options['api_url'], $args );
-      $response_code = wp_remote_retrieve_response_code($response);
-      $response_body = wp_remote_retrieve_body($response);
 
-      // fake mock responses to test WP_Error handling logic
-      // $response = new WP_Error();
-      // $response->add('http_request_failed', 'cURL error 28: Operation timed out after 30001 milliseconds with 0 bytes received');
-      
-      //Handle HTTP errors (4xx, 5xx)
-      if ($response_code >= 400) {
-        self::logger("ERP API Error ($response_code): " . $response_body);
-        
-        $attempt++;
+      // check for errors
+      $errors = self::erp_check_errors($response);
 
-        if ($response_code === 404 && $attempt > $max_attempts)   {
-          UserNotice::admin_notice_message('error', 'Error 404: La URL de la API no existe');
-        } elseif ($response_code === 401 && $attempt > $max_attempts) {
-          UserNotice::admin_notice_message('error', 'Error 401: Acceso no Autorizado: API Key o IP inválida - ' . $response_body);
-        } elseif ($response_code === 500 && $attempt > $max_attempts){
-          UserNotice::admin_notice_message('error', 'Error 500 en la API de Elconix');
-        }
-        
-        sleep(2);
-
-        continue;
-      } 
-
-      // Check if WP_Error (e.g., timeout, connection failed)
-      if (is_wp_error($response)) {
-        
-        $attempt++;
-        
-        // notice for timeout error
-        if (strpos($response->get_error_message(), 'timed out') !== false 
-          || strpos($error_message, 'cURL error 28') !== false
-        ) {
-          self::logger('Timeout Error Detected: ' . $response->get_error_message());
-          
-          if ( $attempt > $max_attempts) {
-            self::logger('Max attempts number reached, aborting program');
-            UserNotice::admin_notice_message('error', 'Time Out Error: La conexión tardó demasiado, intentelo de nuevo más tarde.');
-            return false;
-          }
-          continue;
-        }
-
-        self::logger('API/WP ERROR: ' . $response->get_error_message());
-
-        sleep(2);
-        continue;
-      } 
-      // Otherwise, log the full response (including body, headers, status)
-      else {
-        // logger('API RESPONSE: ' . print_r($response, true));
-      }
-      
-      $attempt++;
-
-      // all is fine, return result / products
-      self::logger('Request Successful!');
-      return json_decode(wp_remote_retrieve_body($response), true);
-
+      // return result if all is fine,
+      if ($errors){
+        return json_decode(wp_remote_retrieve_body($response), true);
+      }      
     }
     
+    // error, return errors
     if ($attempt > $max_attempts) {
-      return false;
+      return $errors;
     }
+  }
 
+  public static function erp_check_errors($response){
+    
+    //Handle HTTP errors (4xx, 5xx)
+    if ($response_code >= 400) {
+      self::logger("ERP API Error ($response_code): " . $response_body);
+      
+      if ($response_code === 404 && $attempt > $max_attempts)   {
+        UserNotice::admin_notice_message('error', 'Error 404: La URL de la API no existe');
+        return false;
+      } elseif ($response_code === 401 && $attempt > $max_attempts) {
+        UserNotice::admin_notice_message('error', 'Error 401: Acceso no Autorizado: API Key o IP inválida - ' . $response_body);
+        return false;
+      } elseif ($response_code === 500 && $attempt > $max_attempts){
+        UserNotice::admin_notice_message('error', 'Error 500 en la API de Elconix');
+        return false;
+      }
+      
+
+    } 
+
+    // fake mock responses to test WP_Error handling logic
+    // $response = new WP_Error();
+    // $response->add('http_request_failed', 'cURL error 28: Operation timed out after 30001 milliseconds with 0 bytes received');
+    
+    // Check if WP_Error (e.g., timeout, connection failed)
+    if (is_wp_error($response)) {
+      
+      // notice for timeout error
+      if (strpos($response->get_error_message(), 'timed out') !== false 
+        || strpos($response->get_error_message(), 'cURL error 28') !== false
+      ) {
+        
+        self::logger('Timeout Error Detected: ' . $response->get_error_message());
+        
+        if ( $attempt >= $max_attempts) {
+          self::logger('Max failed attempts number reached, aborting program');
+          // UserNotice::admin_notice_message('error', 'Time Out Error: La conexión tardó demasiado, intentelo de nuevo más tarde.');
+          return false;
+        }
+
+      }
+
+      self::logger('API/WP ERROR: ' . $response->get_error_message());
+
+      sleep(2);
+    } 
+    // Otherwise, log the full response (including body, headers, status)
+    else {
+      // logger('API RESPONSE: ' . print_r($response, true));
+    }
   }
 
   public static function set_api_args($body, $api_key) {
