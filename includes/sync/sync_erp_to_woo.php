@@ -22,71 +22,137 @@ class ERPtoWoo {
         // exit function with error flag
         return false;
       }
-    } 
-    
-    // set body of request to get all products
-    $request_body = [
-      'class'  => 'GET',
-      'action' => 'products',
-      'page'   => '1',
-    ];
-    
-    $response = self::make_erp_request($request_body, $options);
-    
-    // check wp errors
-    $wp_error = self::erp_check_wp_errors($response);
-    if ($wp_error['error'] == true) {
-      UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $wp_error['error_type'] );
-      return false;
-    }
-
-    // check http errors
-    $http_error = self::erp_check_http_errors($response);
-    if ($http_error['error'] == true) {
-      UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $http_error['error_message'] );
-      return false;
-    }
-
-    // decode json from wp response
-    // $response = json_decode(wp_remote_retrieve_body($response), true);
-    $body = wp_remote_retrieve_body($response);
-    $decoded_response = json_decode($body, true);
-    
-    // import all products
-    if ( $decoded_response ) {
-      if (isset($decoded_response['products'])) {
-        // UserNotice::print_all_products($decoded_response, $stock=false);
-        self::import_all_erp_products($decoded_response['products']);
-      }
     } else {
-      self::logger('no products available or JSON decoded data available');
+      $response = ERPtoWoo::import_all_erp_products($options);
+      if ($response) return true;
       return false;
     }
+    
+    // // set body of request to get all products
+    // $request_body = [
+    //   'class'  => 'GET',
+    //   'action' => 'products',
+    //   'page'   => '1',
+    // ];
+    
+    // $response = self::make_erp_request($request_body, $options);
+    
+    // // check wp errors
+    // $wp_error = self::erp_check_wp_errors($response);
+    // if ($wp_error['error'] == true) {
+    //   UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $wp_error['error_type'] );
+    //   return false;
+    // }
 
-    //success
-    return true;
+    // // check http errors
+    // $http_error = self::erp_check_http_errors($response);
+    // if ($http_error['error'] == true) {
+    //   UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $http_error['error_message'] );
+    //   return false;
+    // }
+
+    // // decode json from wp response
+    // // $response = json_decode(wp_remote_retrieve_body($response), true);
+    // $body = wp_remote_retrieve_body($response);
+    // $decoded_response = json_decode($body, true);
+    
+    // // import all products
+    // if ( $decoded_response ) {
+    //   if (isset($decoded_response['products'])) {
+    //     // UserNotice::print_all_products($decoded_response, $stock=false);
+    //     self::import_all_erp_products($decoded_response['products']);
+    //   }
+    // } else {
+    //   self::logger('no products available or JSON decoded data available');
+    //   return false;
+    // }
+
+    // //success
+    // return true;
   }
 
   /**
-   * while loop to import_all_erp_products
+   * while loop to import_all_erp_products: GET products, check responses, import to woo
    * @param $products json
-   * @return void
+   * @return bool
    */
-  public static function import_all_erp_products($products) {
-    // import products    
-    $total_count = 0;
-    $success_count = 0;
+  public static function import_all_erp_products($options) {
     
-    $products = array_slice($products, 0, 6);
-    foreach ($products as $product) {
-      $total_count ++;
-      $response = self::create_woo_product($product);
+    // while 5 calls, get prods, check responses, import to woo
+    
+    $api_calls_limit = 2; // 25 prods by call
+    $api_call_number = 0;
+    $api_error_number = 0;
+
+    // import products   
+    $products_total_processed = 0;
+    $products_imported_successfully = 0;
+
+    while ( $api_call_number < $api_calls_limit ) {
+      $api_call_number++;
+
+      $request_body = [
+        'class'  => 'GET',
+        'action' => 'products',
+        'page'   => $api_call_number, // use api call number as pagination
+      ];
+
+      $erp_response = ERPtoWoo::make_erp_request($request_body, $options);
+
+      // check wp errors
+      $wp_error = ERPtoWoo::erp_check_wp_errors($erp_response);
+      if ($wp_error['error'] == true) {
+        self::logger('wp error detected: '. $wp_error['error_message']);
+        $api_error_number++;
+        continue;
+      }
+
+      // check http errors
+      $http_error = ERPtoWoo::erp_check_http_errors($erp_response);
+      if ($http_error['error'] == true) {
+        self::logger('http error detected: '. $http_error['error_message']);
+        $api_error_number++;
+        continue;
+      }
+
+      // no errors, get products json
+      $body = wp_remote_retrieve_body($erp_response);
+      $decoded_response = json_decode($body, true);
+
+      // import products with foreach loop
+      if ( $decoded_response ) {
+        if (isset($decoded_response['products'])) {
+          foreach ($decoded_response['products'] as $product) {
+            $products_total_processed++;
+
+            $woo_response = ERPtoWoo::create_woo_product($product);
+            
+            if ($woo_response) {
+              $products_imported_successfully++; 
+            } else { // error
+              self::logger('woo response importing product: '. $woo_response);
+            }
+          }
+        }
+      }
+    } // end of while loop
+
+    self::logger('Importados con éxito ' . $products_imported_successfully . '/' . $products_total_processed . ' productos.');
+    UserNotice::admin_notice_message('success' ,'Importados con éxito ' . $products_imported_successfully . '/' . $products_total_processed . ' productos.');
+    
+    // success
+    return true;
+
+    // import just 5 products to test
+    // $products = array_slice($products, 0, 5);
+    // $products = [];
+    // foreach ($products as $product) {
+    //   $products_total_processed ++;
+    //   $response = self::create_woo_product($product);
       
-      // count success/total
-      if ($response) $success_count++ ;
-    }
-    self::logger('Importados con éxito ' . $success_count . '/' . $total_count . ' productos.');
-    UserNotice::admin_notice_message('success' ,'Importados con éxito ' . $success_count . '/' . $total_count . ' productos.');
+    //   // count success/total
+    //   if ($response) $products_imported_successfully++ ;
+    // }
   }
 
   /**
@@ -94,7 +160,7 @@ class ERPtoWoo {
    * @param $product_data json
    * @return bool true/false success/failure
    */
-  public static function create_woo_product($product_data) {
+  public static function create_woo_product($product_data) { 
     try {
         $product = new WC_Product_Simple();
         $product->set_name($product_data['Producto']['Nombre'] ?? '');
