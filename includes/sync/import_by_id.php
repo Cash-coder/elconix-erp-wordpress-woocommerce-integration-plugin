@@ -26,6 +26,25 @@ class ImportById {
       ];
 
       $erp_response = ERPtoWoo::make_erp_request($request_body, $options);
+      
+          // check wp errors
+      $wp_error = ERPtoWoo::erp_check_wp_errors($erp_response);
+      if ($wp_error['error'] == true) {
+        // UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $wp_error['error_type'] );
+        // return false;
+        self::logger('wp Error detected: '. $wp_error['message']);
+        continue;
+      }
+
+      // check http errors
+      $http_error = ERPtoWoo::erp_check_http_errors($erp_response);
+      if ($http_error['error'] == true) {
+        // UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $http_error['error_type'] );
+        // return false;
+        self::logger('http error detected: '. $http_error['error_message']);
+        continue;
+      }
+      
       $body = wp_remote_retrieve_body($erp_response);
       $decoded_response = json_decode($body, true);
 
@@ -46,7 +65,8 @@ class ImportById {
       //   }
       // }
       
-      if ( $erp_response ) {
+      // create product in woo
+      if ( $decoded_response ) {
         if (isset($decoded_response['products'])) {
           $woo_response = ERPtoWoo::create_woo_product($decoded_response['products'][0]);
           // if no error, success +1
