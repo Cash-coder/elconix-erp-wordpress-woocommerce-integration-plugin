@@ -32,7 +32,7 @@ class ImportById {
       if ($wp_error['error'] == true) {
         // UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $wp_error['error_type'] );
         // return false;
-        self::logger('wp Error detected: '. $wp_error['message']);
+        self::logger('wp error detected: '. $wp_error['error_message']);
         continue;
       }
 

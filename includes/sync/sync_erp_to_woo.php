@@ -5,7 +5,7 @@ require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
 class ERPtoWoo {
 
   /**
-   * Main function for ERP -> Woo integration
+   * Main function for ERP -> Woo integration. If there are IDs it will import those, otherwise it import all products
    * @param mixed $options wp_settings_api get_options()
    * @return bool success/fail
    */
@@ -14,15 +14,15 @@ class ERPtoWoo {
     // if import_by_id have IDs: import ONLY those products, otherwise import all products
     $ids = $options['product_import_by_id'];
     if ($ids){
-      $response_by_id = ImportById::erp_import($options); //IDs included in $options
-      if ($response_by_id) {
+      $response = ImportById::erp_import($options); //IDs included in $options
+      if ($response) {
         // exit function with success flag
         return true;
       } else {
         // exit function with error flag
         return false;
       }
-    }
+    } 
     
     // set body of request to get all products
     $request_body = [
@@ -43,23 +43,26 @@ class ERPtoWoo {
     // check http errors
     $http_error = self::erp_check_http_errors($response);
     if ($http_error['error'] == true) {
-      UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $http_error['error_type'] );
+      UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $http_error['error_message'] );
       return false;
     }
 
     // decode json from wp response
-    $response = json_decode(wp_remote_retrieve_body($response), true);
+    // $response = json_decode(wp_remote_retrieve_body($response), true);
+    $body = wp_remote_retrieve_body($response);
+    $decoded_response = json_decode($body, true);
     
     // import all products
-    if ( $response ) {
-      if (isset($response['products'])) {
-        // UserNotice::print_all_products($response, $stock=false);
-        self::import_all_erp_products($response['products']);
+    if ( $decoded_response ) {
+      if (isset($decoded_response['products'])) {
+        // UserNotice::print_all_products($decoded_response, $stock=false);
+        self::import_all_erp_products($decoded_response['products']);
       }
     } else {
       self::logger('no products available or JSON decoded data available');
       return false;
     }
+
     //success
     return true;
   }
@@ -222,7 +225,7 @@ class ERPtoWoo {
   } 
 
   /**
-   * request just to test HTTP and Wordpress errors 
+   * request just to test HTTP (api, api_key, ip, ...) and Wordpress errors (timeout)
    * @param $options array from wp_settings_api, get_options()
    * @return {error: bool, error_message: string}
    */
@@ -237,6 +240,11 @@ class ERPtoWoo {
     // make request, get Response Code and body
     self::logger('testing ERP connection ...');
     $response = self::make_erp_request($request_body, $options);
+    
+    $wp_error = self::erp_check_wp_errors($response);
+    if ($wp_error['error'] == true) {
+    return ['error' => true, 'error_message' => 'Wordpress server error: ' . $wp_error['error_type'] . ' - Inténtelo de nuevo más tarde.'];
+    }
 
     $http_error = self::erp_check_http_errors($response);
     if ($http_error['error']) {
