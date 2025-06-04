@@ -86,12 +86,13 @@ class ERPtoWoo {
       
       $attempt++;
 
-      self::logger('Product Request Attempt number: ' . $attempt . '/' . $max_attempts);
+      // self::logger('Http Request Attempt number: ' . $attempt . '/' . $max_attempts);
 
       // Make the request
       $response = wp_remote_post( $options['api_url'], $args );
       // self::logger('raw response: ' . print_r($response, true));
-      self::logger('response: ' . $response['response']['code']);
+      // self::logger('response: ' . $response['response']['code']);
+      
       // check for errors
       $errors = self::erp_check_wp_errors($response);
       // self::logger('wp errors: ' . $errors);
@@ -100,12 +101,18 @@ class ERPtoWoo {
       if (!$errors) {
         // return json_decode(wp_remote_retrieve_body($response), true);
         return $response;
-      }      
+
+      } elseif ($errors['error'] == 'timeout') {
+        continue;
+
+      } else {
+        return $errors['error'];
+      }
     }
     
     // error, return errors
     if ($attempt > $max_attempts) {
-      return $errors;
+      return $errors['error'];
     }
 
     // return json_decode(wp_remote_retrieve_body($body), true);
@@ -126,13 +133,17 @@ class ERPtoWoo {
       ) {
         self::logger('Timeout Error Detected: ' . $response->get_error_message());
         
-        return true;
+        // return true;
+        return ['error' => 'timeout'];
     }
+    // other type of wp errors
       self::logger('API/WP ERROR: ' . $response->get_error_message());
-      return true;
+      // return true;
+      return ['error' => $response->get_error_message()];
     } 
 
-    return false;
+    // return false;
+    return ['error' => false];
  
   }
 
@@ -168,22 +179,13 @@ class ERPtoWoo {
     ];
     
     // make request, get Response Code and body
+    self::logger('testing ERP connection ...');
     $response = self::make_erp_request($request_body, $options);
-    // self::logger('from erp_test_connection, response: ' . $response['response']);
+    $response_code = $response['response']['response']['code'];
+    $response_body = $response['body'];
 
-    $wp_error = self::erp_check_wp_errors($response);
-
-    // $response_code = wp_remote_retrieve_response_code($response);
-    $response_code = $response['response']['code'];
-    $response_body = wp_remote_retrieve_body($response);
-
-    self::logger(
-      'response is : '. print_r($response, true) 
-      . ' response code is: ' . $response_code 
-      . ' response body is: '. $response_body
-    );
-
-    //Handle HTTP errors (4xx, 5xx)
+    if ($response['success']) {
+          //Handle HTTP errors (4xx, 5xx)
     if ($response_code >= 400) {
       self::logger("ERP API Error ($response_code): " . $response_body);
       
@@ -199,10 +201,28 @@ class ERPtoWoo {
         // UserNotice::admin_notice_message('error', 'Error 500 en la API de Elconix');
         // return false;
         return ['error' =>'error', 'message'=> 'Error 500 en la API de Elconix' ];
-      }
-    } 
+        }
+      } 
+    }
+
+    // self::logger('from erp_test_connection, response: ' . $response['response']);
+
+    // $wp_error = self::erp_check_wp_errors($response);
+    
+    // $response_code = $response['response']['code'];
+    $response_code = wp_remote_retrieve_response_code($response['response']);
+    $response_body = wp_remote_retrieve_body($response);
+
+    self::logger('response_code is : ' . $response_code);
+
+    // self::logger(
+    //   'response is : '. print_r($response, true) 
+    //   . ' response code is: ' . $response_code 
+    //   . ' response body is: '. $response_body
+    // );
 
     //HTTP is fine
+    self::logger('ERP connection successful!');
     return ['error' => false];
 
   }

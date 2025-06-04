@@ -26,6 +26,9 @@ class ImportById {
       ];
 
       $erp_response = ERPtoWoo::make_erp_request($request_body, $options);
+      $body = wp_remote_retrieve_body($erp_response);
+      $decoded_response = json_decode($body, true);
+
       // check error, notice, stop
       // if ($response[0] == 'error') {
       //   if (isset($response['error']) && $response['error']) {
@@ -44,8 +47,8 @@ class ImportById {
       // }
       
       if ( $erp_response ) {
-        if (isset($erp_response['products'])) {
-          $woo_response = ERPtoWoo::create_woo_product($erp_response['products'][0]);
+        if (isset($decoded_response['products'])) {
+          $woo_response = ERPtoWoo::create_woo_product($decoded_response['products'][0]);
           // if no error, success +1
           if ($woo_response) $success_count++;
 

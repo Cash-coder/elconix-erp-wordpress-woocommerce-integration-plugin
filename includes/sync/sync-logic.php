@@ -26,7 +26,7 @@ function perform_erp_sync() {
   // Test connection with erp 
   $connection_test = ERPtoWoo::erp_test_connection($options);
   if ($connection_test['error']) {
-    logger('http error, ending process');
+    logger('http error: ' . $connection_test['message']);
     UserNotice::admin_notice_message('error',$connection_test['message']);
     return false;    
   }
