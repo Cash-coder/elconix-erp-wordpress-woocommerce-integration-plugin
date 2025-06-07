@@ -57,12 +57,12 @@ class License {
             // Invalid license
             elseif (isset($response_body['status']) && $response_body['status'] === false) {
                 if ($attempt < $max_retries) {
-                    self::logger("License invalid, retry attempt {$attempt}");
+                    self::logger("License is invalid, retry attempt {$attempt}");
                     sleep(2);
                     $attempt++;
                     continue;
                 } else {
-                    self::logger('License is INVALID (final attempt)');
+                    self::logger('License is INVALID (final attempt) ' . $response_body['message']);
                     // $_SESSION['license_error'] = true;
                     return false;
                 }

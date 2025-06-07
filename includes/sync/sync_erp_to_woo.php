@@ -9,9 +9,12 @@ class ERPtoWoo {
    * @param mixed $options wp_settings_api get_options()
    * @return bool success/fail
    */
-  public static function sync_test($options) {
+
+
+  public static function perform_sync_erp_to_woo() {
    
-    // if import_by_id have IDs: import ONLY those products, otherwise import all products
+    $options = get_option('plugin_erpsync');
+    // if import_by_id have IDs: import ONLY those products, otherwise import all products (because if IDs are specified its safe to assume that the user only wants to import those products and not all of them)
     $ids = $options['product_import_by_id'];
     if ($ids){
       $response = ImportById::erp_import($options); //IDs included in $options
@@ -27,48 +30,6 @@ class ERPtoWoo {
       if ($response) return true;
       return false;
     }
-    
-    // // set body of request to get all products
-    // $request_body = [
-    //   'class'  => 'GET',
-    //   'action' => 'products',
-    //   'page'   => '1',
-    // ];
-    
-    // $response = self::make_erp_request($request_body, $options);
-    
-    // // check wp errors
-    // $wp_error = self::erp_check_wp_errors($response);
-    // if ($wp_error['error'] == true) {
-    //   UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $wp_error['error_type'] );
-    //   return false;
-    // }
-
-    // // check http errors
-    // $http_error = self::erp_check_http_errors($response);
-    // if ($http_error['error'] == true) {
-    //   UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $http_error['error_message'] );
-    //   return false;
-    // }
-
-    // // decode json from wp response
-    // // $response = json_decode(wp_remote_retrieve_body($response), true);
-    // $body = wp_remote_retrieve_body($response);
-    // $decoded_response = json_decode($body, true);
-    
-    // // import all products
-    // if ( $decoded_response ) {
-    //   if (isset($decoded_response['products'])) {
-    //     // UserNotice::print_all_products($decoded_response, $stock=false);
-    //     self::import_all_erp_products($decoded_response['products']);
-    //   }
-    // } else {
-    //   self::logger('no products available or JSON decoded data available');
-    //   return false;
-    // }
-
-    // //success
-    // return true;
   }
 
   /**
@@ -284,7 +245,7 @@ class ERPtoWoo {
     
     // Args for wp_remote_post()
     return $args = [
-        'timeout' => 30, // fix timeout bug
+        'timeout' => 40, // fix timeout bug
         'headers' => $headers,
         'body'    => wp_json_encode($request_body), 
     ];  
@@ -320,49 +281,6 @@ class ERPtoWoo {
     // no http errors
     self::logger('ERP connection successful!');
     return ['error' => false];
-    
-    // $response_code = $response['response']['response']['code'];
-    // $response_body = $response['body'];
-
-    // if ($response['success']) {
-    //       //Handle HTTP errors (4xx, 5xx)
-    // if ($response_code >= 400) {
-    //   self::logger("ERP API Error ($response_code): " . $response_body);
-      
-    //   if ($response_code === 404)   {
-    //     // UserNotice::admin_notice_message('error', 'Error 404: La URL de la API no existe');
-    //     // return false;
-    //     return ['error' => 'error','message'=> 'Error 404: La URL de la API no existe'];
-    //   } elseif ($response_code === 401) {
-    //     // UserNotice::admin_notice_message('error', 'Error 401: Acceso no Autorizado: API Key o IP inválida - ' . $response_body);
-    //     // return false;
-    //     return ['error' => 'error', 'message'=> 'Error 401: Acceso no Autorizado: API Key o IP inválida - ' . $response_body];
-    //   } elseif ($response_code === 500){
-    //     // UserNotice::admin_notice_message('error', 'Error 500 en la API de Elconix');
-    //     // return false;
-    //     return ['error' =>'error', 'message'=> 'Error 500 en la API de Elconix' ];
-    //     }
-    //   } 
-    // }
-
-    // self::logger('from erp_test_connection, response: ' . $response['response']);
-
-    // $wp_error = self::erp_check_wp_errors($response);
-    
-    // $response_code = $response['response']['code'];
-    // $response_code = wp_remote_retrieve_response_code($response['response']);
-    // $response_body = wp_remote_retrieve_body($response);
-    // self::logger('response_code is : ' . $response_code);
-
-    // self::logger(
-    //   'response is : '. print_r($response, true) 
-    //   . ' response code is: ' . $response_code 
-    //   . ' response body is: '. $response_body
-    // );
-
-    //HTTP is fine
-    // self::logger('ERP connection successful!');
-    // return ['error' => false];
 
   }
 

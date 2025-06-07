@@ -11,7 +11,7 @@ function perform_erp_sync() {
   
   $options = get_option('plugin_erpsync');
   // foreach ($options as $option) {logger($option);}
-
+ 
   // get license key
   $license_key = $options['license_key'];
   logger('License key provided by the user is : ' . $license_key);
@@ -23,10 +23,10 @@ function perform_erp_sync() {
     return false;
   }
 
-  // Test connection with erp 
+  // Test connection with erp
   $connection_test = ERPtoWoo::erp_test_connection($options);
   if ($connection_test['error']) {
-    logger('http error: ' . $connection_test['error_message']);
+    logger('error in ERP test: ' . $connection_test['error_message']);
     UserNotice::admin_notice_message('error',$connection_test['error_message']);
     return false;    
   }
@@ -45,7 +45,7 @@ function perform_erp_sync() {
     . $options['schedule_time_erpToWoo']
   );
   
-  // if woo to ERP sync is enabled   ********************************
+  // if woo to ERP sync is enabled   *******************************
   if (isset($options['woo_to_ERP']) && $options['woo_to_ERP'] == 1) {
     logger('woo to ERP enabled');
 
@@ -62,13 +62,12 @@ function perform_erp_sync() {
     // if prod sync is enabled
     if (isset($options['prods_sync'])) { // && $options['orders_sync'] == 1) {
       logger('product sync enabled');
-      
 
       // if import_by_id is active it will import ONLY those products
       // logger('sync prods by id:');
       // $response_by_id = ImportById::import();
       
-      $response = ERPtoWoo::sync_test($options);
+      $response = ERPtoWoo::perform_sync_erp_to_woo();
       // if error
       if (!$response) {
         return false;
@@ -82,81 +81,10 @@ function perform_erp_sync() {
   logger('**************** Sync End ****************');
 
   return true;
-
-
-
-/**
- * Simple Action Scheduler Implementation
- * 
- * First, make sure you have Action Scheduler library included in your plugin:
- * - If you have WooCommerce, it's already available
- * - Otherwise, include it as a dependency via Composer or download directly
- */
-
-// 1. Schedule a task to run after 10 seconds
-function schedule_my_erp_sync() {
-  // Make sure Action Scheduler is loaded
-  if (!function_exists('as_schedule_single_action')) {
-      return false;
-  }
-  
-  // Schedule the sync function to run after 10 seconds
-  $timestamp = time() + 10; // 10 seconds from now
-  
-  // The hook name that will trigger your function
-  $hook = 'perform_erp_sync_hook';
-  
-  // Any arguments you want to pass to your function (optional)
-  $args = array('source' => 'manual_trigger');
-  
-  // Schedule the action
-  $action_id = as_schedule_single_action($timestamp, $hook, $args);
-  
-  return $action_id; // Return the action ID for potential unscheduling
-}
-
-// 2. Function to unschedule a specific action
-function unschedule_my_erp_sync($action_id = null) {
-  // If action ID is provided, unschedule that specific action
-  if ($action_id) {
-      return as_unschedule_action('perform_erp_sync_hook', null, null, array(), $action_id);
-  }
-  
-  // Otherwise, unschedule all instances of this hook
-  return as_unschedule_all_actions('perform_erp_sync_hook');
-}
-
-// 3. Hook up your function to the Action Scheduler hook
-add_action('perform_erp_sync_hook', 'execute_erp_sync_via_action_scheduler', 10, 1);
-function execute_erp_sync_via_action_scheduler($source = '') {
-  // Include your sync logic file if needed
-  if (!function_exists('perform_erp_sync')) {
-      include_once(WP_PLUGIN_DIR . '/ERP-Sync/includes/sync/sync-logic.php');
-  }
-  
-  // Call your sync function
-  perform_erp_sync();
-  
-  // Optional: Log that the sync was executed
-  logger('ERP Sync executed via Action Scheduler at ' . date('Y-m-d H:i:s') . ' Source: ' . $source);
-}
-
 }
 
 // Utility function for logging
 function logger($message) {
   UserNotice::log_message( '[sync-logic] ' . $message);
 }
-
-
-
-// add_action('admin_notices', function() {  
-// if ($notice = get_transient('erp_sync_notice')) {
-//     echo '<div class="notice notice-'.esc_attr($notice['type']).' is-dismissible">
-//         <p>'.esc_html($notice['message']).'</p>
-//     </div>';
-//     delete_transient('erp_sync_notice');
-// }
-// });
-
 
