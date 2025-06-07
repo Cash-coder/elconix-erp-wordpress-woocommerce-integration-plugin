@@ -272,9 +272,9 @@ function setting_api_url_fn() {
 function setting_license_key_fn() {
 	$id = 'license_key';
 	$options = get_option('plugin_erpsync');
-	// echo "<input id='api_url' name='plugin_erpsync[text_string]' size='40' type='text' value='{$options['text_string']}' />";		
+	// echo "<input id='api_url' name='plugin_erpsync[text_string]' size='40' type='password' value='{$options['text_string']}' />";		
 	$value = isset($options[$id]) ? $options[$id] : 'Introduzca la Clave de Licencia Plugin';
-	echo "<input id='api_url_txtinput' name='plugin_erpsync[$id]' size='40' type='text' value='{$value}' />";
+	echo "<input id='api_url_txtinput' name='plugin_erpsync[$id]' size='40' type='password' value='{$value}' />";
 }
 
 // API KEY

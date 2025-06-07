@@ -80,7 +80,7 @@ class ERPtoWoo {
     
     // while 5 calls, get prods, check responses, import to woo
     
-    $api_calls_limit = 2; // 25 prods by call
+    $api_calls_limit = 20; // 25 prods by call
     $api_call_number = 0;
     $api_error_number = 0;
 
