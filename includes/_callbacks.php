@@ -1,42 +1,43 @@
 <?php
 // Display the admin options page (main page with options)
-function erpsync_page_fn() {
-	?>	
+function erpsync_page_fn()
+{
+	?>
 	<!-- if setting sync_mode != manual: hide "Sync Now" button -->
-	<?php 
-		$options = get_option('plugin_erpsync');
-		// "manual" default if syncMode isn't set yet	
-		// $sync_mode = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
-		// if ($sync_mode == 'auto') {
-		// 	error_log('new sync mode is ' . $sync_mode . '. NOT rendering "Sincronizar Ahora" button');			
-		// }
-		$sync_mode_wooToErp = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
-		$sync_mode_erpToWoo = isset($options['schedule_mode_erpToWoo']) ? $options['schedule_mode_erpToWoo'] : 'manual';
+	<?php
+	$options = get_option('plugin_erpsync');
+	// "manual" default if syncMode isn't set yet	
+	// $sync_mode = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
+	// if ($sync_mode == 'auto') {
+	// 	error_log('new sync mode is ' . $sync_mode . '. NOT rendering "Sincronizar Ahora" button');			
+	// }
+	$sync_mode_wooToErp = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
+	$sync_mode_erpToWoo = isset($options['schedule_mode_erpToWoo']) ? $options['schedule_mode_erpToWoo'] : 'manual';
 
-		//manual sync is enabled in at least one direction. Used to show or hide "Sync Now" button
-		$is_manual_sync_enabled = ($sync_mode_wooToErp === 'manual') || ($sync_mode_erpToWoo === 'manual');
-	?>	
-		<div class="wrap">
-			<div class="icon32" id="icon-options-general"><br></div>
-			<h1>Integración Elconix ERP</h1>
-			<!-- Some optional text here explaining the overall purpose of the options and what they relate to etc. -->
-			<form action="options.php" method="post">
+	//manual sync is enabled in at least one direction. Used to show or hide "Sync Now" button
+	$is_manual_sync_enabled = ($sync_mode_wooToErp === 'manual') || ($sync_mode_erpToWoo === 'manual');
+	?>
+	<div class="wrap">
+		<div class="icon32" id="icon-options-general"><br></div>
+		<h1>Integración Elconix ERP</h1>
+		<!-- Some optional text here explaining the overall purpose of the options and what they relate to etc. -->
+		<form action="options.php" method="post">
 			<?php settings_fields('plugin_erpsync'); ?>
 			<?php do_settings_sections('erp-sync'); ?>
 			<p class="submit">
 				<input name="Submit" type="submit" class="button-primary" value="<?php esc_attr_e('Guardar Cambios'); ?>" />
 			</p>
+		</form>
+		<!-- show sync now button if manual sync mode is enabled -->
+		<?php if ($is_manual_sync_enabled): ?>
+			<form action="" method="post">
+				<?php wp_nonce_field('erpsync_manual_sync', 'erpsync_nonce'); ?>
+				<p>
+					<input type="submit" name="erpsync_manual_sync" id="erpsync-button" class="button" value="Sincronizar Ahora" />
+				</p>
 			</form>
-			<!-- show sync now button if manual sync mode is enabled -->
-			<?php if ($is_manual_sync_enabled) : ?>
-				<form action="" method="post">
-					<?php wp_nonce_field('erpsync_manual_sync', 'erpsync_nonce'); ?>
-					<p>
-						<input type="submit" name="erpsync_manual_sync" id="erpsync-button" class="button" value="Sincronizar Ahora" />
-					</p>
-				</form>
-			<?php endif; ?>
-		</div>
+		<?php endif; ?>
+	</div>
 	<?php
 }
 
@@ -44,87 +45,103 @@ function erpsync_page_fn() {
 add_action('admin_init', 'erpsync_handle_manual_sync');
 
 // Handle the sync button submission
-function erpsync_handle_manual_sync() {
-  // Check if our form was submitted
-  if (isset($_POST['erpsync_manual_sync'])) {
-      // Verify the nonce for security
-      if (!isset($_POST['erpsync_nonce']) || !wp_verify_nonce($_POST['erpsync_nonce'], 'erpsync_manual_sync')) {
-          wp_die('Security check failed. Please try again.');
-      }
-      
-      // Check user permissions
-      if (!current_user_can('manage_options')) {
-          wp_die('You do not have sufficient permissions to access this page.');
-      }
+function erpsync_handle_manual_sync()
+{
+	// Check if our form was submitted
+	if (isset($_POST['erpsync_manual_sync'])) {
+		// Verify the nonce for security
+		if (!isset($_POST['erpsync_nonce']) || !wp_verify_nonce($_POST['erpsync_nonce'], 'erpsync_manual_sync')) {
+			wp_die('Security check failed. Please try again.');
+		}
 
-      // show button only when manual mode is enabled
-      $options = get_option('plugin_erpsync');
-      if($options['schedule_mode_wooToErp'] === 'manual'){
-        
-				error_log('Detectado boton "Sincronizar Ahora". Modo manual activo. Procediendo con sincronizacion');
-				$sync_result = perform_erp_sync();      
-				
-				// Set a transient to show a message after redirect
-				set_transient('erpsync_message', $sync_result ? 'Sync successful!' : 'Sync failed!', 60);
-	
-				// Redirect to the same page to prevent form resubmission
-				wp_redirect(add_query_arg('page', 'erp-sync', admin_url('options-general.php')));
-				exit;
-      };
-  }
+		// Check user permissions
+		if (!current_user_can('manage_options')) {
+			wp_die('You do not have sufficient permissions to access this page.');
+		}
+
+		// show button only when manual mode is enabled
+		$options = get_option('plugin_erpsync');
+		if ($options['schedule_mode_wooToErp'] === 'manual') {
+
+			error_log('Detectado boton "Sincronizar Ahora". Modo manual activo. Procediendo con sincronizacion');
+			$sync_result = perform_erp_sync();
+
+			// Set a transient to show a message after redirect
+			set_transient('erpsync_message', $sync_result ? 'Sync successful!' : 'Sync failed!', 60);
+
+			// Redirect to the same page to prevent form resubmission
+			wp_redirect(add_query_arg('page', 'erp-sync', admin_url('options-general.php')));
+			exit;
+		}
+		;
+	}
 }
 
 // text line displayed before the first option
-function  section_text_fn() {
+function section_text_fn()
+{
 	echo '<p>Seleccione opciones de integración y haga click en <strong>Guardar Cambios</strong>.</p>';
 }
 
 // sync mode: manual or auto ********************************************
 
 // Sync Mode field callback woo to ERP
-function erpsync_syncmode_wooto_erp_fn() {
-  $options = get_option('plugin_erpsync');
-  $mode = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
-  ?>
-  <select id="schedule_mode_wooToErp" name="plugin_erpsync[schedule_mode_wooToErp]">
-      <option value="manual" <?php selected($mode, 'manual'); ?>>Manual</option>
-      <option value="auto" <?php selected($mode, 'auto'); ?>>Automático</option>
-  </select>
-  <?php
+function erpsync_syncmode_wooto_erp_fn()
+{
+	$options = get_option('plugin_erpsync');
+	$mode = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
+	?>
+	<select id="schedule_mode_wooToErp" name="plugin_erpsync[schedule_mode_wooToErp]">
+		<option value="manual" <?php selected($mode, 'manual'); ?>>Manual</option>
+		<option value="auto" <?php selected($mode, 'auto'); ?>>Automático</option>
+	</select>
+	<?php
 }
 
 // Time field callback wooToERP
-function erpsync_scheduled_time_wooToErp_fn() {
-  $options = get_option('plugin_erpsync');
-  $time = isset($options['schedule_time_wooToErp']) ? $options['schedule_time_wooToErp'] : '12:00';
-  ?>
-  <input type="time" id="schedule_time_wooToErp" name="plugin_erpsync[schedule_time_wooToErp]" value="<?php echo esc_attr($time); ?>">
-  <?php
+function erpsync_scheduled_time_wooToErp_fn()
+{
+	$options = get_option('plugin_erpsync');
+	$time = isset($options['schedule_time_wooToErp']) ? $options['schedule_time_wooToErp'] : '12:00';
+	?>
+	<input 
+		type="time"
+		id="schedule_time_wooToErp" 
+		name="plugin_erpsync[schedule_time_wooToErp]"
+		value="<?php echo esc_attr($time); ?>"
+	>
+	<!-- support message -->
+	<!-- <div class="support-message">Mismo que de ERP a Woocommerce</div> -->
+	<?php
 }
 
 // Sync Mode field callback ERP to woo 
-function erpsync_syncmode_erpToWoo_fn() {
-  $options = get_option('plugin_erpsync');
-  $mode = isset($options['schedule_mode_erpToWoo']) ? $options['schedule_mode_erpToWoo'] : 'manual';
-  ?>
-  <select id="schedule_mode_erpToWoo" name="plugin_erpsync[schedule_mode_erpToWoo]">
-      <option value="manual" <?php selected($mode, 'manual'); ?>>Manual</option>
-      <option value="auto" <?php selected($mode, 'auto'); ?>>Automático</option>
-  </select>
-  <?php
+function erpsync_syncmode_erpToWoo_fn()
+{
+	$options = get_option('plugin_erpsync');
+	$mode = isset($options['schedule_mode_erpToWoo']) ? $options['schedule_mode_erpToWoo'] : 'manual';
+	?>
+	<select id="schedule_mode_erpToWoo" name="plugin_erpsync[schedule_mode_erpToWoo]">
+		<option value="manual" <?php selected($mode, 'manual'); ?>>Manual</option>
+		<option value="auto" <?php selected($mode, 'auto'); ?>>Automático</option>
+	</select>
+	<?php
 }
 
 // Time field callback erptoWoo
-function erpsync_scheduled_time_erpToWoo_fn() {
-  $options = get_option('plugin_erpsync');
-  $time = isset($options['schedule_time_erpToWoo']) ? $options['schedule_time_erpToWoo'] : '12:00';
-  ?>
-  <input type="time" id="schedule_time_erpToWoo" name="plugin_erpsync[schedule_time_erpToWoo]" value="<?php echo esc_attr($time); ?>">
-  <?php
+function erpsync_scheduled_time_erpToWoo_fn()
+{
+	$options = get_option('plugin_erpsync');
+	$time = isset($options['schedule_time_erpToWoo']) ? $options['schedule_time_erpToWoo'] : '12:00';
+	?>
+	<input type="time" id="schedule_time_erpToWoo" name="plugin_erpsync[schedule_time_erpToWoo]"
+		value="<?php echo esc_attr($time); ?>">
+	<?php
 }
 
 // Woo to ERP *********************************************
-function woo_to_erp_fn() {
+function woo_to_erp_fn()
+{
 	$options = get_option('plugin_erpsync');
 	$checked = isset($options['woo_to_ERP']) ? 'checked' : '';
 	echo '<label class="switch">';
@@ -134,30 +151,33 @@ function woo_to_erp_fn() {
 }
 
 // orders
-function orders_sync_fn() {
+function orders_sync_fn()
+{
 	$options = get_option('plugin_erpsync');
 	$checked = isset($options['orders_sync']) ? 'checked' : '';
 	// $checked= '';
-	if(isset($options['orders_sync']) && $options['orders_sync']) { 
-    $checked = ' checked="checked" '; 
+	if (isset($options['orders_sync']) && $options['orders_sync']) {
+		$checked = ' checked="checked" ';
 	}
 	// echo "<input class='sub-option' ".$checked." id='orders_chk' name='plugin_erpsync[orders_sync]' type='checkbox' />";
 	echo '<div class="sub-option"><input id="orders_chk" name="plugin_erpsync[orders_sync]" type="checkbox" /></div>';
 }
 
 // returns
-function returns_sync_fn() {
+function returns_sync_fn()
+{
 	$options = get_option('plugin_erpsync');
 	$checked = isset($options['returns_sync']) ? 'checked' : '';
 	// $checked= '';
-	if(isset($options['returns_sync']) && $options['returns_sync']) { 
-    $checked = ' checked="checked" '; 
+	if (isset($options['returns_sync']) && $options['returns_sync']) {
+		$checked = ' checked="checked" ';
 	}
-	echo "<input ".$checked." id='returns_chk' name='plugin_erpsync[returns_sync]' type='checkbox' />";
+	echo "<input " . $checked . " id='returns_chk' name='plugin_erpsync[returns_sync]' type='checkbox' />";
 }
 
 // ERP to woo *********************************************
-function erp_to_woo_fn() {
+function erp_to_woo_fn()
+{
 	$options = get_option('plugin_erpsync');
 	$checked = isset($options['erp_to_woo']) ? 'checked' : '';
 	echo '<label class="switch">';
@@ -167,21 +187,23 @@ function erp_to_woo_fn() {
 }
 
 // products
-function prods_sync_fn() {
+function prods_sync_fn()
+{
 	$options = get_option('plugin_erpsync');
 	$checked = isset($options['prods_sync']) ? 'checked' : '';
-	if(isset($options['prods_sync']) && $options['prods_sync']) { 
-    $checked = ' checked="checked" '; 
+	if (isset($options['prods_sync']) && $options['prods_sync']) {
+		$checked = ' checked="checked" ';
 	}
-	echo "<input ".$checked." id='returns_chk' name='plugin_erpsync[prods_sync]' type='checkbox' />";
+	echo "<input " . $checked . " id='returns_chk' name='plugin_erpsync[prods_sync]' type='checkbox' />";
 }
 
-function import_products_by_id_fn() {
+function import_products_by_id_fn()
+{
 	$options = get_option('plugin_erpsync');
-	
+
 	// Implement $value with proper fallback
 	$value = isset($options['product_import_by_id']) ? esc_attr($options['product_import_by_id']) : '';
-	
+
 	// Output the textarea with inline CSS
 	echo "<textarea 
 					id='product_import_by_id_id' 
@@ -202,8 +224,9 @@ function import_products_by_id_fn() {
 // CSS
 // Woo to ERP
 add_action('admin_head', 'erp_sync_toggle_styles');
-function erp_sync_toggle_styles() {
-    echo '
+function erp_sync_toggle_styles()
+{
+	echo '
 		<style>
 			.switch {	
 				position: relative;
@@ -242,7 +265,8 @@ function erp_sync_toggle_styles() {
 }
 
 add_action('admin_head', 'erp_sync_suboptions_styles');
-function erp_sync_suboptions_styles() {
+function erp_sync_suboptions_styles()
+{
 	echo '
 		<style>
 			// .sub-option {
@@ -259,17 +283,19 @@ function erp_sync_suboptions_styles() {
 }
 
 // API URL
-function setting_api_url_fn() {
-		$options = get_option('plugin_erpsync');
-		// echo "<input id='api_url' name='plugin_erpsync[text_string]' size='40' type='text' value='{$options['text_string']}' />";
-		
-		// implement $value here to avoid error when the user hasnt saved the value yet, and therefore doesn't exist in the database yet
-		$value = isset($options['api_url']) ? $options['api_url'] : '';
-		echo "<input id='api_url_txtinput' name='plugin_erpsync[api_url]' size='40' type='text' value='{$options['api_url']}' />";
-	}
+function setting_api_url_fn()
+{
+	$options = get_option('plugin_erpsync');
+	// echo "<input id='api_url' name='plugin_erpsync[text_string]' size='40' type='text' value='{$options['text_string']}' />";
+
+	// implement $value here to avoid error when the user hasnt saved the value yet, and therefore doesn't exist in the database yet
+	$value = isset($options['api_url']) ? $options['api_url'] : '';
+	echo "<input id='api_url_txtinput' name='plugin_erpsync[api_url]' size='40' type='text' value='{$options['api_url']}' />";
+}
 
 // LICENCE KEY
-function setting_license_key_fn() {
+function setting_license_key_fn()
+{
 	$id = 'license_key';
 	$options = get_option('plugin_erpsync');
 	// echo "<input id='api_url' name='plugin_erpsync[text_string]' size='40' type='password' value='{$options['text_string']}' />";		
@@ -278,7 +304,8 @@ function setting_license_key_fn() {
 }
 
 // API KEY
-function setting_apikey_fn() {
+function setting_apikey_fn()
+{
 	$options = get_option('plugin_erpsync');
 	$value = isset($options['api_key']) ? $options['api_key'] : '';
 	// echo "<input id='erpsync_api_key' name='plugin_erpsync['api_key']' size='40' type='password' value='{$value}' />";
@@ -286,72 +313,75 @@ function setting_apikey_fn() {
 }
 
 // wooToErp show/hide time field if sync mode is auto/manual
-function time_schedule_wooToErp_input() {
-  ?>
-  <script>
-  jQuery(document).ready(function($) {
-      function toggleWooToErpTimeField() {
-          var mode = $('#schedule_mode_wooToErp').val();
-          if (mode === 'auto') {
-              $('.schedule-time-field-wooToErp').show();
-          } else {
-              $('.schedule-time-field-wooToErp').hide();
-          }
-      }
-      
-      // Run on page load
-      toggleWooToErpTimeField();
-      
-      // Run when select changes
-      $('#schedule_mode_wooToErp').on('change', toggleWooToErpTimeField);
-  });
-  </script>
-  <?php
+function time_schedule_wooToErp_input()
+{
+	?>
+	<script>
+		jQuery(document).ready(function ($) {
+			function toggleWooToErpTimeField() {
+				var mode = $('#schedule_mode_wooToErp').val();
+				if (mode === 'auto') {
+					$('.schedule-time-field-wooToErp').show();
+				} else {
+					$('.schedule-time-field-wooToErp').hide();
+				}
+			}
+
+			// Run on page load
+			toggleWooToErpTimeField();
+
+			// Run when select changes
+			$('#schedule_mode_wooToErp').on('change', toggleWooToErpTimeField);
+		});
+	</script>
+	<?php
 }
-add_action('admin_footer', 'time_schedule_wooToErp_input');  
+add_action('admin_footer', 'time_schedule_wooToErp_input');
 
 // ErpToWoo show/hide time field if sync mode is auto/manual
-function time_schedule_erpToWoo_input() {
-  ?>
-  <script>
-  jQuery(document).ready(function($) {
-      function toggleErpToWooTimeField() {
-          var mode = $('#schedule_mode_erpToWoo').val();
-          if (mode === 'auto') {
-              $('.schedule-time-field-erpToWoo').show();
-          } else {
-              $('.schedule-time-field-erpToWoo').hide();
-          }
-      }
-      
-      // Run on page load
-      toggleErpToWooTimeField();
-      
-      // Run when select changes
-      $('#schedule_mode_erpToWoo').on('change', toggleErpToWooTimeField);
-  });
-  </script>
-  <?php
+function time_schedule_erpToWoo_input()
+{
+	?>
+	<script>
+		jQuery(document).ready(function ($) {
+			function toggleErpToWooTimeField() {
+				var mode = $('#schedule_mode_erpToWoo').val();
+				if (mode === 'auto') {
+					$('.schedule-time-field-erpToWoo').show();
+				} else {
+					$('.schedule-time-field-erpToWoo').hide();
+				}
+			}
+
+			// Run on page load
+			toggleErpToWooTimeField();
+
+			// Run when select changes
+			$('#schedule_mode_erpToWoo').on('change', toggleErpToWooTimeField);
+		});
+	</script>
+	<?php
 }
-add_action('admin_footer', 'time_schedule_erpToWoo_input');  
+add_action('admin_footer', 'time_schedule_erpToWoo_input');
 
 // show progress message to the user
-function erp_sync_progress_handler() {
-  ?>
-  <script>
-  jQuery(document).ready(function($) {
-      // Show processing message
-      // function showSyncProgress() {
-      //     $('#erpsync-button')
+function erp_sync_progress_handler()
+{
+	?>
+	<script>
+		jQuery(document).ready(function ($) {
+			// Show processing message
+			// function showSyncProgress() {
+			//     $('#erpsync-button')
 			// 			.after('<div 
 			// 				id="sync-progress" 
 			// 				style="margin-top:10px; color:#0073aa;"
 			// 				>🔄 Sincronización en progreso ...
 			// 				</div>');
-      // }
+			// }
 
 			function showSyncProgress() {
-			$('#erpsync-button').after(`
+				$('#erpsync-button').after(`
 				<div id="sync-progress" style="
 					margin-top: 15px;
 					padding: 15px;
@@ -372,32 +402,32 @@ function erp_sync_progress_handler() {
 					<span>Sincronización en progreso...</span>
 				</div>
 			`);
-    
-			// Add spin animation
-			$('<style>')
-				.prop('type', 'text/css')
-				.html('@keyframes spin { 100% { transform: rotate(360deg); } }')
-				.appendTo('head');
+
+				// Add spin animation
+				$('<style>')
+					.prop('type', 'text/css')
+					.html('@keyframes spin { 100% { transform: rotate(360deg); } }')
+					.appendTo('head');
 			}
-      
-      // Hide processing message
-      function hideSyncProgress() {
-          $('#sync-progress').remove();
-          $('#erpsync-button').prop('disabled', false);
-      }
-      
-      // Trigger on form submission, not button click
-      $('#erpsync-button').closest('form').on('submit', function() {
-          showSyncProgress();
-          // $('#erpsync-button').prop('disabled', true);
-      });
-      
-      // Make functions globally accessible for PHP triggers
-      window.showSyncProgress = showSyncProgress;
-      window.hideSyncProgress = hideSyncProgress;
-  });
-  </script>
-  <?php
+
+			// Hide processing message
+			function hideSyncProgress() {
+				$('#sync-progress').remove();
+				$('#erpsync-button').prop('disabled', false);
+			}
+
+			// Trigger on form submission, not button click
+			$('#erpsync-button').closest('form').on('submit', function () {
+				showSyncProgress();
+				// $('#erpsync-button').prop('disabled', true);
+			});
+
+			// Make functions globally accessible for PHP triggers
+			window.showSyncProgress = showSyncProgress;
+			window.hideSyncProgress = hideSyncProgress;
+		});
+	</script>
+	<?php
 }
 add_action('admin_footer', 'erp_sync_progress_handler');
 

@@ -62,10 +62,6 @@ function perform_erp_sync() {
     // if prod sync is enabled
     if (isset($options['prods_sync'])) { // && $options['orders_sync'] == 1) {
       logger('product sync enabled');
-
-      // if import_by_id is active it will import ONLY those products
-      // logger('sync prods by id:');
-      // $response_by_id = ImportById::import();
       
       $response = ERPtoWoo::perform_sync_erp_to_woo();
       // if error
