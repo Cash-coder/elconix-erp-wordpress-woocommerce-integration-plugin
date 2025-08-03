@@ -8,8 +8,10 @@ function erpsync_init_fn(){
     'plugin_erpsync_validate' // validation callback
   );
 
+  // used in action_scheduler to detect changes in sync_mode and sync_time_interval, because it can detect values before and after clicking "save" button, then compare the values and schedule actions is sync_mode or sync_time_interval have changed
   // run scheduler handler function BEFORE submission of "Guardar Cambios" button
-  add_action('update_option_plugin_erpsync', 'erpsync_scheduler_handler', 10, 3);
+  // add_action('update_option_plugin_erpsync', 'erpsync_scheduler_handler', 10, 3);
+  add_action('update_option_plugin_erpsync', ['ERPsync_Action_Scheduler', 'erpsync_scheduler_handler'], 10, 3);
 
   add_settings_section(
     'main_section', // id
@@ -45,12 +47,13 @@ function erpsync_init_fn(){
   add_settings_field(
     'schedule_time_wooToErp',
     'Horario Sincronización',
-    'erpsync_scheduled_time_wooToErp_fn',
+    // 'erpsync_scheduled_time_wooToErp_fn',
+    'erpsync_sync_time_interval_fn',
     'erp-sync',
     'main_section',
     [
       'class' => 'schedule-time-field-wooToErp',
-      'label_for' => 'schedule_time_wooToErp' 
+      'label_for' => 'sync_time_interval' 
     ]
   );
 

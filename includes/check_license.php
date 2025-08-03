@@ -51,7 +51,6 @@ class License {
             // Valid license
             if (isset($response_body['status']) && $response_body['status'] === true) {
                 self::logger('License is valid');
-                // $_SESSION['license_error'] = false;
                 return true;
             }
             // Invalid license
@@ -73,7 +72,6 @@ class License {
         }
         
         self::logger('License check failed after ' . $max_retries . ' attempts');
-        // $_SESSION['license_error'] = true;
         return false;
     }
 

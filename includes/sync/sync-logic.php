@@ -34,15 +34,10 @@ function perform_erp_sync() {
   logger(
     'Sync mode for Woo to ERP is ' 
     . $options['schedule_mode_wooToErp'] 
-    . ' | auto sync time set at: '
-    . $options['schedule_time_wooToErp']
-  );
-
-  logger(
-    'Sync mode for ERP to Woo is ' 
+    . ' | Sync mode for ERP to Woo is '  
     . $options['schedule_mode_erpToWoo'] 
-    . ' | auto sync time set at: '
-    . $options['schedule_time_erpToWoo']
+    . ' | auto sync time interval set at: '
+    . $options['sync_time_interval'] . ' minutes'
   );
   
   // if woo to ERP sync is enabled   *******************************

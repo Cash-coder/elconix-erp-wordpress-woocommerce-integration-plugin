@@ -99,20 +99,64 @@ function erpsync_syncmode_wooto_erp_fn()
 }
 
 // Time field callback wooToERP
-function erpsync_scheduled_time_wooToErp_fn()
-{
+function erpsync_scheduled_time_wooToErp_fn(){
 	$options = get_option('plugin_erpsync');
-	$time = isset($options['schedule_time_wooToErp']) ? $options['schedule_time_wooToErp'] : '12:00';
+	$sync_interval_time = isset($options['sync_interval_time']) ? $options['sync_interval_time'] : '04:00';
 	?>
 	<input 
 		type="time"
 		id="schedule_time_wooToErp" 
-		name="plugin_erpsync[schedule_time_wooToErp]"
-		value="<?php echo esc_attr($time); ?>"
+		name="plugin_erpsync[sync_interval_time]"
+		value="<?php echo esc_attr($sync_interval_time); ?>"
 	>
 	<!-- support message -->
 	<!-- <div class="support-message">Mismo que de ERP a Woocommerce</div> -->
 	<?php
+}
+
+function erpsync_sync_time_interval_fn(){
+	$options = get_option('plugin_erpsync');
+	$sync_time_interval = isset($options['sync_time_interval']) ? $options['sync_time_interval'] : '150';
+
+	// Convert sync_time_interval to hours and minutes
+	$hours = floor($sync_time_interval / 60);
+	$minutes = $sync_time_interval % 60;
+
+	// echo '
+	// <div class="duration-input">
+	// 		<input type="number" name="sync_duration_hours" min="0" max="24" value="' . esc_attr($hours) . '"> horas
+	// 		<input type="number" name="sync_duration_minutes" min="0" max="59" step="15" value="' . esc_attr($minutes) . '"> minutos
+	// </div>
+	// <p class="description">Sincronizar cada (ejemplo: 2h30m)</p>';
+
+	echo '
+  <div class="duration-input">
+    <input type="number" id="sync_duration_hours" name="plugin_erpsync[sync_duration_hours]" min="0" max="24" value="' . esc_attr($hours) . '"> horas
+    <input type="number" id="sync_duration_minutes" name="plugin_erpsync[sync_duration_minutes]" min="0" max="59" step="15" value="' . esc_attr($minutes) . '"> minutos
+    <!-- Hidden field to store total minutes -->
+    <input type="hidden" id="sync_time_interval" name="plugin_erpsync[sync_time_interval]" value="' . esc_attr($sync_time_interval) . '">
+  </div>
+  <p class="description">Sincronizar cada (ejemplo: 2h30m)</p>';
+
+  // JavaScript to update hidden field when hours/minutes change
+  echo '
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const hoursInput = document.getElementById("sync_duration_hours");
+    const minutesInput = document.getElementById("sync_duration_minutes");
+    const hiddenField = document.getElementById("sync_time_interval");
+
+    function updateHiddenField() {
+      const totalMinutes = (parseInt(hoursInput.value) || 0) * 60 + (parseInt(minutesInput.value) || 0);
+      hiddenField.value = totalMinutes;
+    }
+
+    hoursInput.addEventListener("change", updateHiddenField);
+    minutesInput.addEventListener("change", updateHiddenField);
+  });
+  </script>';
+
+
 }
 
 // Sync Mode field callback ERP to woo 

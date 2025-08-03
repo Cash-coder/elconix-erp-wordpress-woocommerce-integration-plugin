@@ -9,8 +9,6 @@ class ERPtoWoo {
    * @param mixed $options wp_settings_api get_options()
    * @return bool success/fail
    */
-
-
   public static function perform_sync_erp_to_woo() {
    
     $options = get_option('plugin_erpsync');
@@ -41,7 +39,7 @@ class ERPtoWoo {
     
     // while 5 calls, get prods, check responses, import to woo
     
-    $api_calls_limit = 20; // 25 prods by call
+    $api_calls_limit = 1; // 25 prods by call
     $api_call_number = 0;
     $api_error_number = 0;
 
