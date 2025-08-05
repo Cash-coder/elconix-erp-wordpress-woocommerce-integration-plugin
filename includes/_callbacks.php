@@ -265,6 +265,30 @@ function import_products_by_id_fn()
 					'>{$value}</textarea>";
 }
 
+function import_products_by_category_fn()
+{
+	$options = get_option('plugin_erpsync');
+
+	// Implement $value with proper fallback
+	$value = isset($options['product_import_by_category']) ? esc_attr($options['product_import_by_category']) : '';
+
+	// Output the textarea with inline CSS
+	echo "<textarea 
+					id='product_import_by_id_category' 
+					name='plugin_erpsync[product_import_by_category]' 
+					rows='6' 
+					style='
+							width: 60%;
+							min-height: 100px;
+							max-height: 200px;
+							overflow-y: auto;
+							padding: 8px;
+							box-sizing: border-box;
+							font-family: inherit;
+							font-size: 14px;
+					'>{$value}</textarea>";
+}
+
 // CSS
 // Woo to ERP
 add_action('admin_head', 'erp_sync_toggle_styles');

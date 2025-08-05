@@ -36,6 +36,8 @@ class ERPsync_Action_Scheduler {
       . "sync_time_interval old value: $sync_time_interval_old_value \n"
       . "sync_time_interval new value: $sync_time_interval_new_value \n"
 
+      . "sync products by category are (if any exist): :" . $options_new_values['product_import_by_category']
+
     );
   
     // error_log('Sync Mode changes: old: ' . $sync_mode_old_value . ' | new: ' . $sync_mode_new_value);

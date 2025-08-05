@@ -127,11 +127,22 @@ function erpsync_init_fn(){
     'prods_sync' 
   );
 
-  // License
+  // import by ID
   add_settings_field(
     'product_import_by_id', // id api_url
-    'Importar productos por ID: (separados por comas)', // title
+    'Importar productos por ID', // title
     'import_products_by_id_fn', // callback
+    'erp-sync', // page
+    'main_section', // section: same as id in add_settings_section()
+    // 'license_key'
+    // args array
+  );
+
+  // import by category
+  add_settings_field(
+    'product_import_by_category', // id api_url
+    'Importar productos por categoría', // title
+    'import_products_by_category_fn', // callback
     'erp-sync', // page
     'main_section', // section: same as id in add_settings_section()
     // 'license_key'

@@ -18,7 +18,7 @@ class ImportById {
     foreach ($ids as $id) {
       self::logger('Importing ID: ' . $id);
 
-      //{“class”:”GET”,”action”:”products”,”id”:”PS0000003″}
+      //sample request: {“class”:”GET”,”action”:”products”,”id”:”PS0000003″}
       $request_body = [
         'class'  => 'GET',
         'action' => 'products',
@@ -27,7 +27,7 @@ class ImportById {
 
       $erp_response = ERPtoWoo::make_erp_request($request_body, $options);
       
-          // check wp errors
+      // check wp errors
       $wp_error = ERPtoWoo::erp_check_wp_errors($erp_response);
       if ($wp_error['error'] == true) {
         // UserNotice::admin_notice_message('error', 'Wordpress server error: ' . $wp_error['error_type'] );
