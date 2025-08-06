@@ -1,11 +1,12 @@
 <?php
 
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
+require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/erpsync_import_by_category.php';
 
 class ERPtoWoo {
 
   /**
-   * Main function for ERP -> Woo integration. If there are IDs it will import those, otherwise it import all products
+   * Main function for ERP -> Woo integration. If there are IDs (import product by ID) or categories (import product by category) it will import those, otherwise it import all products
    * @param mixed $options wp_settings_api get_options()
    * @return bool success/fail
    */
@@ -14,14 +15,28 @@ class ERPtoWoo {
     $options = get_option('plugin_erpsync');
     // if import_by_id have IDs: import ONLY those products, otherwise import all products (because if IDs are specified its safe to assume that the user only wants to import those products and not all of them)
     $ids = $options['product_import_by_id'];
-    if ($ids){
-      $response = ImportById::erp_import($options); //IDs included in $options
-      if ($response) {
-        // exit function with success flag
-        return true;
-      } else {
-        // exit function with error flag
+    $categories= $options['product_import_by_category'];
+
+    if ($ids || $categories) {
+      $response_ids = false;
+      $response_categories = false;
+      
+      if ($ids) {
+        $response_ids = ImportById::erp_import($options); //IDs included in $options
+      }
+      
+      if ($categories) {
+        $response_categories = erpsync_import_by_category::import_by_category($options);
+      }
+      
+      // if both responses are false, return false
+      if (!$response_ids && !$response_categories) {
         return false;
+      }
+      
+      // if one of the responses is true, return true
+      if ($response_ids || $response_categories) {
+        return true;
       }
     } else {
       $response = ERPtoWoo::import_all_erp_products($options);

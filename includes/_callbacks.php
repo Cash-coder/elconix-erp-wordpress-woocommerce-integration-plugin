@@ -59,9 +59,12 @@ function erpsync_handle_manual_sync()
 			wp_die('You do not have sufficient permissions to access this page.');
 		}
 
-		// show button only when manual mode is enabled
+		// show button only when manual mode is enabled in at least one option (wooToERP or ERPtoWoo)
 		$options = get_option('plugin_erpsync');
-		if ($options['schedule_mode_wooToErp'] === 'manual') {
+		$sync_mode_wooToErp = isset($options['schedule_mode_wooToErp']) ? $options['schedule_mode_wooToErp'] : 'manual';
+		$sync_mode_erpToWoo = isset($options['schedule_mode_erpToWoo']) ? $options['schedule_mode_erpToWoo'] : 'manual';
+		
+		if ($sync_mode_wooToErp === 'manual' || $sync_mode_erpToWoo === 'manual') {
 
 			error_log('Detectado boton "Sincronizar Ahora". Modo manual activo. Procediendo con sincronizacion');
 			$sync_result = perform_erp_sync();
