@@ -266,6 +266,7 @@ function import_products_by_id_fn()
 							font-family: inherit;
 							font-size: 14px;
 					'>{$value}</textarea>";
+	echo "<p class='description'>Separados por comas, ejemplo: MIGPS00024,MIGPS00023</p>";
 }
 
 function import_products_by_category_fn()
@@ -290,6 +291,7 @@ function import_products_by_category_fn()
 							font-family: inherit;
 							font-size: 14px;
 					'>{$value}</textarea>";
+	echo "<p class='description'>Ejemplo: L3: BILLETERA, L2: accesorios</p>";
 }
 
 // CSS
