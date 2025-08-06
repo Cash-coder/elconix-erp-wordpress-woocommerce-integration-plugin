@@ -140,7 +140,16 @@ class ERPtoWoo {
         $product->set_name($product_data['Producto']['Nombre'] ?? '');
         $product->set_sku($product_data['Producto']['Item_Number'] ?? '');
         $product->set_regular_price($product_data['Producto']['Precio_Venta'] ?? 1);
-        self::logger('created woo product with ID: ' . $product->save());
+        
+        // Handle category hierarchy
+        $category_id = self::create_category_hierarchy($product_data);
+        if ($category_id) {
+          $product->set_category_ids([$category_id]);
+          self::logger("Assigned product to category ID: $category_id");
+        }
+        
+        $product_id = $product->save();
+        self::logger('created woo product with ID: ' . $product_id);
         return true;
     } catch (Exception $e) {
         self::logger("Product creation failed: " . $e->getMessage());
@@ -324,6 +333,55 @@ class ERPtoWoo {
     }
 
     return ['error'=> false,'response_code'=> $response_code];
+  }
+  
+  /**
+   * Create category hierarchy and return the deepest category ID
+   * @param array $product_data ERP product data
+   * @return int|null Category ID or null if no categories
+   */
+  private static function create_category_hierarchy($product_data) {
+    $categories = [];
+    $parent_id = 0;
+    
+    // Extract categories from ERP data
+    for ($i = 1; $i <= 3; $i++) {
+      $category_key = "Category_L$i";
+      if (isset($product_data['Producto'][$category_key]) && !empty($product_data['Producto'][$category_key])) {
+        $categories[] = ucwords(strtolower($product_data['Producto'][$category_key]));
+      }
+    }
+    
+    if (empty($categories)) {
+      return null;
+    }
+    
+    // Create hierarchy: each category becomes child of previous
+    foreach ($categories as $category_name) {
+      $term = term_exists($category_name, 'product_cat', $parent_id);
+      
+      if (!$term) {
+        // Category doesn't exist, create it
+        $term = wp_insert_term(
+          $category_name,
+          'product_cat',
+          array('parent' => $parent_id)
+        );
+        
+        if (is_wp_error($term)) {
+          self::logger("Failed to create category '$category_name': " . $term->get_error_message());
+          continue;
+        }
+        
+        $parent_id = $term['term_id'];
+        self::logger("Created category '$category_name' with ID: $parent_id");
+      } else {
+        $parent_id = $term['term_id'];
+        self::logger("Found existing category '$category_name' with ID: $parent_id");
+      }
+    }
+    
+    return $parent_id;
   }
   
   // Utility function for logging
