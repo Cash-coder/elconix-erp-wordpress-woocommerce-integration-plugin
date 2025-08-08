@@ -54,7 +54,7 @@ class ERPtoWoo {
     
     // while 5 calls, get prods, check responses, import to woo
     
-    $api_calls_limit = 1; // 25 prods by call
+    $api_calls_limit = 2; // 25 prods by call
     $api_call_number = 0;
     $api_error_number = 0;
 
@@ -136,10 +136,34 @@ class ERPtoWoo {
    */
   public static function create_woo_product($product_data) { 
     try {
+        // Check stock quantity from "Rebajamoda via España" warehouse
+        $stock_quantity = 0;
+        if (isset($product_data['InStock']) && is_array($product_data['InStock'])) {
+            foreach ($product_data['InStock'] as $warehouse) {
+                if ($warehouse['WareHouse'] === 'Rebajamoda via España') {
+                    $stock_quantity = (int)$warehouse['Available'];
+                    break;
+                }
+            }
+        }
+        
+        // Skip product creation if no stock available
+        // if ($stock_quantity <= 0) {
+        //     $product_id = $product_data['Producto']['id'] ?? 'unknown';
+        //     $product_name = $product_data['Producto']['Nombre'] ?? 'unknown';
+        //     self::logger("product ID $product_id with name $product_name not created due to 0 stock in warehouse Rebajamoda via España");
+        //     return false;
+        // }
+        
         $product = new WC_Product_Simple();
         $product->set_name($product_data['Producto']['Nombre'] ?? '');
         $product->set_sku($product_data['Producto']['Item_Number'] ?? '');
         $product->set_regular_price($product_data['Producto']['Precio_Venta'] ?? 1);
+        
+        // Set stock quantity and management
+        $product->set_stock_quantity($stock_quantity);
+        $product->set_manage_stock(true);  
+        $product->set_stock_status('instock');
         
         // Handle category hierarchy
         $category_id = self::create_category_hierarchy($product_data);
@@ -149,7 +173,7 @@ class ERPtoWoo {
         }
         
         $product_id = $product->save();
-        self::logger('created woo product with ID: ' . $product_id);
+        self::logger('created woo product with ID: ' . $product_id . ', stock: ' . $stock_quantity);
         return true;
     } catch (Exception $e) {
         self::logger("Product creation failed: " . $e->getMessage());

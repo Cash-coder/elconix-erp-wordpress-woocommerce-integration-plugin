@@ -291,7 +291,7 @@ function import_products_by_category_fn()
 							font-family: inherit;
 							font-size: 14px;
 					'>{$value}</textarea>";
-	echo "<p class='description'>Ejemplo: L3: BILLETERA, L2: accesorios</p>";
+	echo "<div class='description' style='width: 60%; display: block;'>Ejemplo: {L1: damas, L2: accesorios, L3: billetera}, {L1: ...}</div>";
 }
 
 // CSS
