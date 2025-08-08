@@ -2,7 +2,12 @@
 class UserNotice {
 
   public static function log_message($message) {
-    error_log($message);
+    $log_file = ERP_SYNC_PLUGIN_DIR . 'erp_sync.log';
+    $timestamp = date('[Y-m-d H:i:s UTC] ');
+    $formatted_message = $timestamp . $message . PHP_EOL;
+    
+    // Ensure the file is writable and create if it doesn't exist
+    file_put_contents($log_file, $formatted_message, FILE_APPEND | LOCK_EX);
   }
 
   public static function admin_notice_message($type, $message){
@@ -28,31 +33,31 @@ class UserNotice {
   
   public static function print_all_products($decoded_data, $stock=false){
       foreach ($decoded_data['products'] as $product) {
-        error_log("-------- PRODUCT START --------");
+        self::log_message("-------- PRODUCT START --------");
         
         // Log Product Details
         if (isset($product['Producto'])) {
             foreach ($product['Producto'] as $key => $value) {
-                error_log("$key: $value");
+                self::log_message("$key: $value");
             }
         }
         // if stock variable is true, print warehouses too
         if ($stock) {
           if (isset($product['InStock'])) {
-            error_log("\nSTOCK INFO:");
+            self::log_message("\nSTOCK INFO:");
             foreach ($product['InStock'] as $stock) {
                 foreach ($stock as $key => $value) {
-                    error_log("$key: $value");
+                    self::log_message("$key: $value");
                 }
-                error_log("---"); // Separator between warehouses
+                self::log_message("---"); // Separator between warehouses
             }
           }
         }
         if (isset($product['PriceLists'])) {
-          error_log("\nPRICE LISTS:");
+          self::log_message("\nPRICE LISTS:");
           foreach ($product['PriceLists'] as $price) {
               foreach ($price as $key => $value) {
-                  error_log("$key: $value");
+                  self::log_message("$key: $value");
               }
           }
       }
@@ -73,7 +78,7 @@ class UserNotice {
   }
 
   public static function api_error($response) {
-    error_log('ERPtoWoo sync: Invalid API response - ' . print_r($response, true));
+    self::log_message('ERPtoWoo sync: Invalid API response - ' . print_r($response, true));
     echo '<div class="api-error-notice">
       <p> Error desde la API</p>
       <pre>' . esc_html( print_r($response, true) ) . '</pre>

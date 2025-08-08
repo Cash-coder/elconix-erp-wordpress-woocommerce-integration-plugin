@@ -66,7 +66,9 @@ function erpsync_handle_manual_sync()
 		
 		if ($sync_mode_wooToErp === 'manual' || $sync_mode_erpToWoo === 'manual') {
 
-			error_log('Detectado boton "Sincronizar Ahora". Modo manual activo. Procediendo con sincronizacion');
+			// error_log('Detectado boton "Sincronizar Ahora". Modo manual activo. Procediendo con sincronizacion');
+			UserNotice::log_message("[callbacks] " . "(Detectado boton Sincronizar Ahora. Modo manual activo. Procediendo con sincronizacion");
+			
 			$sync_result = perform_erp_sync();
 
 			// Set a transient to show a message after redirect
@@ -535,7 +537,7 @@ add_action('admin_footer', 'erp_sync_progress_handler');
 // 	$items = array("Square", "Triangle", "Circle");
 // 	foreach($items as $item) {
 // 		$checked = ($options['option_set1']==$item) ? ' checked="checked" ' : '';
-// 		echo "<label><input ".$checked." value='$item' name='plugin_erpsync[option_set1]' type='radio' /> $item</label><br />";
+// 		echo "<label><input ".$crequire_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';hecked." value='$item' name='plugin_erpsync[option_set1]' type='radio' /> $item</label><br />";
 // 	}
 // }
 
