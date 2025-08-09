@@ -2,6 +2,7 @@
 
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/check_license.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/sync_erp_to_woo.php';
+require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/sync_woo_to_erp.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/import_by_id.php';
 
@@ -44,6 +45,8 @@ function perform_erp_sync() {
   if (isset($options['woo_to_ERP']) && $options['woo_to_ERP'] == 1) {
     logger('woo to ERP enabled');
 
+    $WooToErp_response = WooToErp::perform_sync_woo_to_erp();
+
     // if orders sync is enabled
     if (isset($options['orders_sync'])) { // && $options['orders_sync'] == 1) {
       logger('orders sync enabled');
@@ -58,9 +61,9 @@ function perform_erp_sync() {
     if (isset($options['prods_sync'])) { // && $options['orders_sync'] == 1) {
       logger('product sync enabled');
       
-      $response = ERPtoWoo::perform_sync_erp_to_woo();
+      $ERPtoWoo_response = ERPtoWoo::perform_sync_erp_to_woo();
       // if error
-      if (!$response) {
+      if (!$ERPtoWoo_response) {
         return false;
       }
     }

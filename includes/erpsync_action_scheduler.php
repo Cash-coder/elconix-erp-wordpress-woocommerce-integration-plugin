@@ -14,65 +14,107 @@ class ERPsync_Action_Scheduler {
   public static function erpsync_scheduler_handler($options_old_values, $options_new_values) {
   
     // foreach ($old_value as $value) {
-    //   error_log($value);
+    //   logger($value);
     // }
     // foreach ($new_value as $value) {
-    //   error_log($value);
+    //   logger($value);
     // }
   
-    // if sync_mode:auto|manual has changed, handle erpsync_schedule_action() based on that 
-    $sync_mode_old_value = $options_old_values['schedule_mode_wooToErp'];
-    $sync_mode_new_value = $options_new_values['schedule_mode_wooToErp'];
-  
-    // compare if time_interval:int has changed,  handle action_scheduler based on that 
-    $sync_time_interval_old_value = $options_old_values['sync_time_interval'];
-    $sync_time_interval_new_value = $options_new_values['sync_time_interval'];
+    // wooToErp sync mode and time interval (with fallbacks)
+    $wooToErp_sync_mode_old_value = isset($options_old_values['schedule_mode_wooToErp']) ? $options_old_values['schedule_mode_wooToErp'] : 'manual';
+    $wooToErp_sync_mode_new_value = isset($options_new_values['schedule_mode_wooToErp']) ? $options_new_values['schedule_mode_wooToErp'] : 'manual';
+    $sync_time_interval_woo_to_erp_old_value = isset($options_old_values['sync_time_interval_woo_to_erp']) ? $options_old_values['sync_time_interval_woo_to_erp'] : '150';
+    $sync_time_interval_woo_to_erp_new_value = isset($options_new_values['sync_time_interval_woo_to_erp']) ? $options_new_values['sync_time_interval_woo_to_erp'] : '150';
+
+    // erpToWoo sync mode and time interval (with fallbacks) 
+    $erpToWoo_sync_mode_old_value = isset($options_old_values['schedule_mode_erpToWoo']) ? $options_old_values['schedule_mode_erpToWoo'] : 'manual';
+    $erpToWoo_sync_mode_new_value = isset($options_new_values['schedule_mode_erpToWoo']) ? $options_new_values['schedule_mode_erpToWoo'] : 'manual';
+    $sync_time_interval_erp_to_woo_old_value = isset($options_old_values['sync_time_interval_erp_to_woo']) ? $options_old_values['sync_time_interval_erp_to_woo'] : '150';
+    $sync_time_interval_erp_to_woo_new_value = isset($options_new_values['sync_time_interval_erp_to_woo']) ? $options_new_values['sync_time_interval_erp_to_woo'] : '150';
     
     // self::logger
     self::logger(
-      "sync_mode and sync_time_interval data changes: \n"
-      . "sync_mode_old_value:  $sync_mode_old_value  \n"
-      . "sync_mode_new_value: $sync_mode_new_value . \n"
-      . "sync_time_interval old value: $sync_time_interval_old_value \n"
-      . "sync_time_interval new value: $sync_time_interval_new_value \n"
-
-      . "sync products by category are (if any exist): :" . $options_new_values['product_import_by_category']
-
+      "sync_mode and sync_time_interval data changes for wooToErp and erpToWoo: \n\n"
+      . "erpToWoo: \n"
+      . "erpToWoo_sync_mode_old_value:  $erpToWoo_sync_mode_old_value  \n"
+      . "erpToWoo_sync_mode_new_value: $erpToWoo_sync_mode_new_value \n"
+      . "sync_time_interval_erp_to_woo old value: $sync_time_interval_erp_to_woo_old_value \n"
+      . "sync_time_interval_erp_to_woo new value: $sync_time_interval_erp_to_woo_new_value \n\n"
+      . "wooToErp: \n"
+      . "wooToErp_sync_mode_old_value:  $wooToErp_sync_mode_old_value  \n"
+      . "wooToErp_sync_mode_new_value: $wooToErp_sync_mode_new_value \n"
+      . "sync_time_interval_woo_to_erp old value: $sync_time_interval_woo_to_erp_old_value \n"
+      . "sync_time_interval_woo_to_erp new value: $sync_time_interval_woo_to_erp_new_value \n\n"
+      . "sync products by category are (if any exist): " . $options_new_values['product_import_by_category']
     );
   
-    // error_log('Sync Mode changes: old: ' . $sync_mode_old_value . ' | new: ' . $sync_mode_new_value);
+    // logger('Sync Mode changes: old: ' . $sync_mode_old_value . ' | new: ' . $sync_mode_new_value);
   
-    // if the schedule mode settings were changed
-    if ($sync_mode_new_value !== $sync_mode_old_value) {
-      error_log('Sync Mode change detected, changed from mode ' . $sync_mode_old_value . ', to mode ' . $sync_mode_new_value);
+    // Check for wooToErp schedule mode changes
+    if ($wooToErp_sync_mode_new_value !== $wooToErp_sync_mode_old_value) {
+      logger('WooToErp Sync Mode change detected, changed from mode ' . $wooToErp_sync_mode_old_value . ', to mode ' . $wooToErp_sync_mode_new_value);
   
-      // trigger the un/schedule action fn
       // if changed from manual to auto: schedule a new action
-      if ($sync_mode_old_value == 'manual' && $sync_mode_new_value == 'auto') {
-  
-        error_log('scheduling new action');
-        self::erpsync_schedule_action($sync_mode_new_value, 'schedule_new_action');
-  
+      if ($wooToErp_sync_mode_old_value == 'manual' && $wooToErp_sync_mode_new_value == 'auto') {
+        logger('scheduling new wooToErp action');
+        self::erpsync_schedule_action($sync_time_interval_woo_to_erp_new_value, 'schedule_new_action', 'wooToErp');
       }
   
       // if changed from auto to manual: remove old scheduled action
-      if ($sync_mode_old_value == 'auto' && $sync_mode_new_value == 'manual'){
-        error_log('UNscheduling action');
-        self::erpsync_schedule_action($sync_mode_new_value, 'unschedule_action');
+      if ($wooToErp_sync_mode_old_value == 'auto' && $wooToErp_sync_mode_new_value == 'manual'){
+        logger('UNscheduling wooToErp action');
+        self::erpsync_schedule_action($sync_time_interval_woo_to_erp_new_value, 'unschedule_action', 'wooToErp');
       }
     } 
-    // elseif ()
+
+    // Check for erpToWoo schedule mode changes
+    if ($erpToWoo_sync_mode_new_value !== $erpToWoo_sync_mode_old_value) {
+      logger('ErpToWoo Sync Mode change detected, changed from mode ' . $erpToWoo_sync_mode_old_value . ', to mode ' . $erpToWoo_sync_mode_new_value);
+  
+      // if changed from manual to auto: schedule a new action
+      if ($erpToWoo_sync_mode_old_value == 'manual' && $erpToWoo_sync_mode_new_value == 'auto') {
+        logger('scheduling new erpToWoo action');
+        self::erpsync_schedule_action($sync_time_interval_erp_to_woo_new_value, 'schedule_new_action', 'erpToWoo');
+      }
+  
+      // if changed from auto to manual: remove old scheduled action
+      if ($erpToWoo_sync_mode_old_value == 'auto' && $erpToWoo_sync_mode_new_value == 'manual'){
+        logger('UNscheduling erpToWoo action');
+        self::erpsync_schedule_action($sync_time_interval_erp_to_woo_new_value, 'unschedule_action', 'erpToWoo');
+      }
+    }
+
+    // Check for wooToErp time interval changes (when sync mode is auto)
+    if ($wooToErp_sync_mode_new_value == 'auto' && $sync_time_interval_woo_to_erp_new_value !== $sync_time_interval_woo_to_erp_old_value) {
+      logger('WooToErp time interval change detected, changed from ' . $sync_time_interval_woo_to_erp_old_value . ' minutes to ' . $sync_time_interval_woo_to_erp_new_value . ' minutes');
+      
+      // Unschedule old action and schedule new one with updated interval
+      logger('Rescheduling wooToErp action with new time interval');
+      self::erpsync_schedule_action($sync_time_interval_woo_to_erp_new_value, 'unschedule_action', 'wooToErp');
+      self::erpsync_schedule_action($sync_time_interval_woo_to_erp_new_value, 'schedule_new_action', 'wooToErp');
+    }
+
+    // Check for erpToWoo time interval changes (when sync mode is auto)
+    if ($erpToWoo_sync_mode_new_value == 'auto' && $sync_time_interval_erp_to_woo_new_value !== $sync_time_interval_erp_to_woo_old_value) {
+      logger('ErpToWoo time interval change detected, changed from ' . $sync_time_interval_erp_to_woo_old_value . ' minutes to ' . $sync_time_interval_erp_to_woo_new_value . ' minutes');
+      
+      // Unschedule old action and schedule new one with updated interval
+      logger('Rescheduling erpToWoo action with new time interval');
+      self::erpsync_schedule_action($sync_time_interval_erp_to_woo_new_value, 'unschedule_action', 'erpToWoo');
+      self::erpsync_schedule_action($sync_time_interval_erp_to_woo_new_value, 'schedule_new_action', 'erpToWoo');
+    }
   
   }
   
   /**
    * Summary of erpsync_schedule_action
-   * @param $time_interval int (hours)
+   * @param $time_interval int (minutes)
    * @param mixed $action fn()
+   * @param string $direction wooToErp or erpToWoo
    * @return void
    */
-  private static function erpsync_schedule_action($time_interval, $action) {
-    error_log('action is ' . $action);
+  private static function erpsync_schedule_action($time_interval, $action, $direction = 'wooToErp') {
+    logger('action is ' . $action . ' for direction: ' . $direction);
   
     // Check if Action Scheduler is already loaded (by WooCommerce or another plugin)
     if (!class_exists('ActionScheduler')) {
@@ -80,12 +122,14 @@ class ERPsync_Action_Scheduler {
       require_once plugin_dir_path(__FILE__) . 'vendor/action-scheduler/action-scheduler.php';
     }
   
+    // Determine the action hook based on direction
+    $action_hook = ($direction == 'erpToWoo') ? 'perform_sync_erp_to_woo_hook' : 'perform_sync_woo_to_erp_hook';
+
     if ($action == 'unschedule_action') {
       
       // as_unschedule_action( $hook, $args, $group );
-      as_unschedule_action('perform_erp_sync');
-      // as_unschedule_action('perform_sync_erp_to_woo_hook'); 
-      error_log('action perform_erpsync unscheduled');
+      as_unschedule_action($action_hook);
+      logger('action ' . $action_hook . ' unscheduled for ' . $direction);
   
     } elseif ($action == 'schedule_new_action') {
       // if ($action == 'schedule_new_action'){
@@ -102,15 +146,17 @@ class ERPsync_Action_Scheduler {
       // );
 
   
-      // Schedule test time to sync 
-      $next_run = time() + 30;  // Start in 1 minute (60 seconds)
-      $interval = 30;          // Run every 60 seconds (1 minute)
+      // Convert time_interval from minutes to seconds
+      $interval_seconds = $time_interval * 60;
+      
+      // Schedule first run in 30 seconds
+      $next_run = time() + 30;
         
-      // Schedule intervales, cron job style, run every x seconds
+      // Schedule recurring action using proper interval and hook
       $action_id = as_schedule_recurring_action(
-        $next_run,       // When to first run
-        10, // DAY_IN_SECONDS,   // How often to rerun (daily); interval in seconds
-        'perform_erp_sync'  // The hook to execute
+        $next_run,           // When to first run
+        $interval_seconds,   // How often to rerun (in seconds)
+        $action_hook         // The hook to execute
       );
       
       // Daily at certain hour
@@ -121,13 +167,12 @@ class ERPsync_Action_Scheduler {
       // );
       
       
-      error_log('scheduled action with id: ' . $action_id . ' | time now: ' . time() . ' | scheduled time: ' . $next_run);
-      $options = get_option('plugin_erpsync');
-      error_log( 'Time interval to sync selected by the user: ' . $options['schedule_time_wooToErp']);
+      logger('scheduled ' . $direction . ' action with id: ' . $action_id . ' | time now: ' . time() . ' | scheduled time: ' . $next_run . ' | interval: ' . $time_interval . ' minutes (' . $interval_seconds . ' seconds)');
+      logger( 'Action hook: ' . $action_hook . ' for direction: ' . $direction);
   
     // Enqueue an action to run one time, as soon as possible.
     // $id = as_enqueue_async_action('perform_erp_sync');
-    // error_log('sheduled action id is ' . $id);
+    // logger('sheduled action id is ' . $id);
     }
   }
 
@@ -137,11 +182,9 @@ class ERPsync_Action_Scheduler {
 
 }
 
-
-
 // // register hook for sync function callback, to be detected and run by action-schduler
 // function perform_erp_sync_callback() {
-//   error_log('ERP Sync executed via Action Scheduler at ' . date('Y-m-d H:i:s'));
+//   logger('ERP Sync executed via Action Scheduler at ' . date('Y-m-d H:i:s'));
   
 //   // Call your actual sync function
 //   if (function_exists('perform_erp_sync')) {
@@ -154,7 +197,12 @@ class ERPsync_Action_Scheduler {
 // add_action('perform_erp_sync', 'perform_erp_sync_callback');
 
 add_action('perform_sync_erp_to_woo_hook', function() {
-  // $erp_sync = new ERPtoWoo();
-  // $erp_sync->perform_sync_erp_to_woo();
   ERPtoWoo::perform_sync_erp_to_woo();
+});
+
+add_action('perform_sync_woo_to_erp_hook', function() {
+  require_once ERP_SYNC_PLUGIN_DIR . 'includes/sync/sync_woo_to_erp.php';
+  
+  // Call the new WooToErp sync function
+  WooToErp::perform_sync_woo_to_erp();
 });

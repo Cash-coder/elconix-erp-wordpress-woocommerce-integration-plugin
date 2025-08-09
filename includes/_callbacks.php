@@ -121,7 +121,7 @@ function erpsync_scheduled_time_wooToErp_fn(){
 
 function erpsync_sync_time_interval_fn(){
 	$options = get_option('plugin_erpsync');
-	$sync_time_interval = isset($options['sync_time_interval']) ? $options['sync_time_interval'] : '150';
+	$sync_time_interval = isset($options['sync_time_interval_woo_to_erp']) ? $options['sync_time_interval_woo_to_erp'] : '150';
 
 	// Convert sync_time_interval to hours and minutes
 	$hours = floor($sync_time_interval / 60);
@@ -139,7 +139,7 @@ function erpsync_sync_time_interval_fn(){
     <input type="number" id="sync_duration_hours" name="plugin_erpsync[sync_duration_hours]" min="0" max="24" value="' . esc_attr($hours) . '"> horas
     <input type="number" id="sync_duration_minutes" name="plugin_erpsync[sync_duration_minutes]" min="0" max="59" step="15" value="' . esc_attr($minutes) . '"> minutos
     <!-- Hidden field to store total minutes -->
-    <input type="hidden" id="sync_time_interval" name="plugin_erpsync[sync_time_interval]" value="' . esc_attr($sync_time_interval) . '">
+    <input type="hidden" id="sync_time_interval_woo_to_erp" name="plugin_erpsync[sync_time_interval_woo_to_erp]" value="' . esc_attr($sync_time_interval) . '">
   </div>
   <p class="description">Sincronizar cada (ejemplo: 2h30m)</p>';
 
@@ -149,7 +149,7 @@ function erpsync_sync_time_interval_fn(){
   document.addEventListener("DOMContentLoaded", function() {
     const hoursInput = document.getElementById("sync_duration_hours");
     const minutesInput = document.getElementById("sync_duration_minutes");
-    const hiddenField = document.getElementById("sync_time_interval");
+    const hiddenField = document.getElementById("sync_time_interval_woo_to_erp");
 
     function updateHiddenField() {
       const totalMinutes = (parseInt(hoursInput.value) || 0) * 60 + (parseInt(minutesInput.value) || 0);
@@ -161,6 +161,43 @@ function erpsync_sync_time_interval_fn(){
   });
   </script>';
 
+
+}
+
+function erpsync_sync_time_interval_erp_to_woo_fn(){
+	$options = get_option('plugin_erpsync');
+	$sync_time_interval = isset($options['sync_time_interval_erp_to_woo']) ? $options['sync_time_interval_erp_to_woo'] : '150';
+
+	// Convert sync_time_interval to hours and minutes
+	$hours = floor($sync_time_interval / 60);
+	$minutes = $sync_time_interval % 60;
+
+	echo '
+  <div class="duration-input">
+    <input type="number" id="sync_duration_hours_erp_to_woo" name="plugin_erpsync[sync_duration_hours_erp_to_woo]" min="0" max="24" value="' . esc_attr($hours) . '"> horas
+    <input type="number" id="sync_duration_minutes_erp_to_woo" name="plugin_erpsync[sync_duration_minutes_erp_to_woo]" min="0" max="59" step="15" value="' . esc_attr($minutes) . '"> minutos
+    <!-- Hidden field to store total minutes -->
+    <input type="hidden" id="sync_time_interval_erp_to_woo" name="plugin_erpsync[sync_time_interval_erp_to_woo]" value="' . esc_attr($sync_time_interval) . '">
+  </div>
+  <p class="description">Sincronizar cada (ejemplo: 2h30m)</p>';
+
+  // JavaScript to update hidden field when hours/minutes change
+  echo '
+  <script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const hoursInput = document.getElementById("sync_duration_hours_erp_to_woo");
+    const minutesInput = document.getElementById("sync_duration_minutes_erp_to_woo");
+    const hiddenField = document.getElementById("sync_time_interval_erp_to_woo");
+
+    function updateHiddenField() {
+      const totalMinutes = (parseInt(hoursInput.value) || 0) * 60 + (parseInt(minutesInput.value) || 0);
+      hiddenField.value = totalMinutes;
+    }
+
+    hoursInput.addEventListener("change", updateHiddenField);
+    minutesInput.addEventListener("change", updateHiddenField);
+  });
+  </script>';
 
 }
 

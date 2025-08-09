@@ -53,7 +53,7 @@ function erpsync_init_fn(){
     'main_section',
     [
       'class' => 'schedule-time-field-wooToErp',
-      'label_for' => 'sync_time_interval' 
+      'label_for' => 'sync_time_interval_woo_to_erp'
     ]
   );
 
@@ -108,12 +108,12 @@ function erpsync_init_fn(){
   add_settings_field(
     'schedule_time_erpToWoo',
     'Horario Sincronización',
-    'erpsync_scheduled_time_erpToWoo_fn',
+    'erpsync_sync_time_interval_erp_to_woo_fn',
     'erp-sync',
     'main_section',
     [
       'class' => 'schedule-time-field-erpToWoo',
-      'label_for' => 'schedule_time_erpToWoo' 
+      'label_for' => 'sync_time_interval_erp_to_woo'
     ]
   );
 
