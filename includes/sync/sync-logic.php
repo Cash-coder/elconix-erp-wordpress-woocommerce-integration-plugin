@@ -37,8 +37,10 @@ function perform_erp_sync() {
     . $options['schedule_mode_wooToErp'] 
     . ' | Sync mode for ERP to Woo is '  
     . $options['schedule_mode_erpToWoo'] 
-    . ' | auto sync time interval set at: '
-    . $options['sync_time_interval'] . ' minutes'
+    . ' | wooToErp sync interval: '
+    . (isset($options['sync_time_interval_woo_to_erp']) ? $options['sync_time_interval_woo_to_erp'] : 'not set') . ' minutes'
+    . ' | erpToWoo sync interval: '
+    . (isset($options['sync_time_interval_erp_to_woo']) ? $options['sync_time_interval_erp_to_woo'] : 'not set') . ' minutes'
   );
   
   // if woo to ERP sync is enabled   *******************************

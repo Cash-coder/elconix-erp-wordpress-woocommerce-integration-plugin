@@ -174,6 +174,20 @@ class ERPtoWoo {
         
         $product_id = $product->save();
         self::logger('created woo product with ID: ' . $product_id . ', stock: ' . $stock_quantity);
+        
+        // Handle product images
+        if (isset($product_data['Images']) && is_array($product_data['Images']) && !empty($product_data['Images'])) {
+            $image_ids = self::process_product_images($product_data['Images'], $product_id);
+            if (!empty($image_ids)) {
+                $product->set_image_id($image_ids[0]); // Set first image as main image
+                if (count($image_ids) > 1) {
+                    $product->set_gallery_image_ids(array_slice($image_ids, 1)); // Set rest as gallery
+                }
+                $product->save();
+                self::logger('Added ' . count($image_ids) . ' images to product ID: ' . $product_id);
+            }
+        }
+        
         return true;
     } catch (Exception $e) {
         self::logger("Product creation failed: " . $e->getMessage());
@@ -406,6 +420,149 @@ class ERPtoWoo {
     }
     
     return $parent_id;
+  }
+  
+  /**
+   * Process and import product images from ERP to WordPress media library
+   * @param array $images Array of image data from ERP API
+   * @param int $product_id WooCommerce product ID
+   * @return array Array of attachment IDs
+   */
+  private static function process_product_images($images, $product_id) {
+    $attachment_ids = [];
+    
+    foreach ($images as $image_data) {
+      if (!isset($image_data['src']) || empty($image_data['src'])) {
+        continue;
+      }
+      
+      $image_url = $image_data['src'];
+      self::logger("Processing image: $image_url");
+      
+      // Check if image already exists for this product
+      $existing_attachment = self::get_existing_attachment_by_url($image_url, $product_id);
+      if ($existing_attachment) {
+        $attachment_ids[] = $existing_attachment;
+        self::logger("Using existing image attachment ID: $existing_attachment");
+        continue;
+      }
+      
+      // Download and upload image
+      $attachment_id = self::upload_image_from_url($image_url, $product_id);
+      if ($attachment_id) {
+        $attachment_ids[] = $attachment_id;
+        self::logger("Successfully uploaded image with attachment ID: $attachment_id");
+      } else {
+        self::logger("Failed to upload image: $image_url");
+      }
+    }
+    
+    return $attachment_ids;
+  }
+  
+  /**
+   * Upload image from URL to WordPress media library
+   * @param string $image_url URL of the image
+   * @param int $product_id WooCommerce product ID
+   * @return int|false Attachment ID on success, false on failure
+   */
+  private static function upload_image_from_url($image_url, $product_id) {
+    // Include required WordPress functions
+    if (!function_exists('media_handle_sideload')) {
+      require_once(ABSPATH . 'wp-admin/includes/media.php');
+      require_once(ABSPATH . 'wp-admin/includes/file.php');
+      require_once(ABSPATH . 'wp-admin/includes/image.php');
+    }
+    
+    try {
+      // Download image to temporary file using WordPress function
+      $temp_file = download_url($image_url, 30);
+      
+      if (is_wp_error($temp_file)) {
+        self::logger("Failed to download image: " . $temp_file->get_error_message());
+        return false;
+      }
+      
+      // Get file extension from URL
+      $file_extension = pathinfo(parse_url($image_url, PHP_URL_PATH), PATHINFO_EXTENSION);
+      if (empty($file_extension)) {
+        $file_extension = 'jpg'; // Default fallback
+      }
+      
+      // Create filename
+      $filename = 'erp-product-' . $product_id . '-' . uniqid() . '.' . $file_extension;
+      
+      // Prepare file array for media_handle_sideload
+      $file_array = array(
+        'name'     => $filename,
+        'tmp_name' => $temp_file,
+      );
+      
+      // Upload to media library using sideload (designed for external files)
+      $attachment_id = media_handle_sideload($file_array, $product_id);
+      
+      // Clean up temp file
+      if (file_exists($temp_file)) {
+        unlink($temp_file);
+      }
+      
+      if (is_wp_error($attachment_id)) {
+        self::logger("Media sideload failed: " . $attachment_id->get_error_message());
+        return false;
+      }
+      
+      // Store original URL in attachment meta for future reference
+      update_post_meta($attachment_id, '_erp_original_url', $image_url);
+      
+      return $attachment_id;
+      
+    } catch (Exception $e) {
+      self::logger("Exception during image upload: " . $e->getMessage());
+      return false;
+    }
+  }
+  
+  /**
+   * Check if an image attachment already exists for this URL and product
+   * @param string $image_url Original image URL
+   * @param int $product_id Product ID
+   * @return int|false Attachment ID if found, false otherwise
+   */
+  private static function get_existing_attachment_by_url($image_url, $product_id) {
+    global $wpdb;
+    
+    $attachment_id = $wpdb->get_var($wpdb->prepare("
+      SELECT post_id 
+      FROM {$wpdb->postmeta} 
+      WHERE meta_key = '_erp_original_url' 
+      AND meta_value = %s
+      AND post_id IN (
+        SELECT ID FROM {$wpdb->posts} 
+        WHERE post_parent = %d 
+        AND post_type = 'attachment'
+      )
+      LIMIT 1
+    ", $image_url, $product_id));
+    
+    return $attachment_id ? (int)$attachment_id : false;
+  }
+  
+  /**
+   * Get file extension from MIME type
+   * @param string $mime_type MIME type
+   * @return string File extension
+   */
+  private static function get_extension_from_mime_type($mime_type) {
+    $mime_types = array(
+      'image/jpeg' => 'jpg',
+      'image/jpg'  => 'jpg',
+      'image/png'  => 'png',
+      'image/gif'  => 'gif',
+      'image/webp' => 'webp',
+      'image/svg+xml' => 'svg'
+    );
+    
+    return isset($mime_types[$mime_type]) ? $mime_types[$mime_type] : 'jpg';
   }
   
   // Utility function for logging
