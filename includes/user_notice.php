@@ -3,7 +3,8 @@ class UserNotice {
 
   public static function log_message($message) {
     $log_file = ERP_SYNC_PLUGIN_DIR . 'erp_sync.log';
-    $timestamp = date('[Y-m-d H:i:s UTC] ');
+    // $timestamp = date('[Y-m-d UTC] ');
+    $timestamp = date('[Y-m-d H:i:s] ');
     $formatted_message = $timestamp . $message . PHP_EOL;
     
     // Ensure the file is writable and create if it doesn't exist
