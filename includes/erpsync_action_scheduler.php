@@ -149,8 +149,10 @@ class ERPsync_Action_Scheduler {
       // Convert time_interval from minutes to seconds
       $interval_seconds = $time_interval * 60;
       
-      // Schedule first run in 30 seconds
-      $next_run = time() + 30;
+      // Schedule test run in 30 seconds
+      // $next_run = time() + 30;
+
+      $next_run = time() + $interval_seconds;
         
       // Schedule recurring action using proper interval and hook
       $action_id = as_schedule_recurring_action(

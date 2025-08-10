@@ -1,9 +1,12 @@
 <?php
 /**
- * Plugin Name: ERP Sync
- * Description: Sync WooCommerce data with ERP system
- * Version: 1.0
+ * Plugin Name: Elconix ERP Sync
+ * Description: Sync Elconix ERP data with WooCommerce and viceversa
+ * Version: 1.7
  * Author: Vako Lovecraft
+ * Author URI: https://vako-lovecraft.com/   
+ * Tested up to: 6.4
+ * License: GPL v2 or later
  */
 
 // Define plugin constants

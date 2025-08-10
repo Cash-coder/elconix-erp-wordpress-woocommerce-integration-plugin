@@ -66,8 +66,8 @@ class erpsync_import_by_category {
           $products_total_processed++;
           
           // Testing limit: stop after 10 products per category
-          if ($products_total_processed > 10) 
-            break;
+          // if ($products_total_processed > 10) 
+          //   break;
           
           $woo_response = ERPtoWoo::create_woo_product($product);
           
