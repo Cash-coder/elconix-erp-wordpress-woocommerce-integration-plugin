@@ -166,3 +166,71 @@ function add_erpsync_defaults_fn() {
 //     </style>';
 // }
 // add_action('admin_head', 'sync_button_styles');
+
+// Simple AJAX endpoint to get log file content
+add_action('wp_ajax_get_log_content', 'get_log_content_callback');
+
+function get_log_content_callback() {
+    check_ajax_referer('erp_log_nonce', 'security');
+    
+    $log_file = ERP_SYNC_PLUGIN_DIR . 'erp_sync.log';
+    $last_position = isset($_POST['last_position']) ? intval($_POST['last_position']) : 0;
+    
+    if (!file_exists($log_file)) {
+        wp_send_json_success(['content' => '', 'position' => 0]);
+        return;
+    }
+    
+    $file_size = filesize($log_file);
+    if ($file_size <= $last_position) {
+        wp_send_json_success(['content' => '', 'position' => $last_position]);
+        return;
+    }
+    
+    $handle = fopen($log_file, 'r');
+    fseek($handle, $last_position);
+    $new_content = fread($handle, $file_size - $last_position);
+    fclose($handle);
+    
+    wp_send_json_success(['content' => $new_content, 'position' => $file_size]);
+}
+
+// Schedule log cleanup every 90 days
+register_activation_hook(__FILE__, 'schedule_log_cleanup');
+
+function schedule_log_cleanup() {
+    if (!wp_next_scheduled('erp_sync_log_cleanup')) {
+        // Schedule to run every 90 days (90 * 24 * 60 * 60 seconds)
+        wp_schedule_event(time(), 'erp_sync_90days', 'erp_sync_log_cleanup');
+    }
+}
+
+// Register custom 90-day interval
+add_filter('cron_schedules', 'add_90day_interval');
+
+function add_90day_interval($schedules) {
+    $schedules['erp_sync_90days'] = array(
+        'interval' => 90 * 24 * 60 * 60, // 90 days in seconds
+        'display' => 'Every 90 Days'
+    );
+    return $schedules;
+}
+
+// Clean up the log file (runs every 90 days)
+add_action('erp_sync_log_cleanup', 'clean_old_logs');
+
+function clean_old_logs() {
+    $log_file = ERP_SYNC_PLUGIN_DIR . 'erp_sync.log';
+    
+    if (file_exists($log_file)) {
+        file_put_contents($log_file, '');
+        UserNotice::log_message('[SYSTEM] Log file cleaned automatically (90-day cleanup)');
+    }
+}
+
+// Clean up scheduled event on plugin deactivation
+register_deactivation_hook(__FILE__, 'unschedule_log_cleanup');
+
+function unschedule_log_cleanup() {
+    wp_clear_scheduled_hook('erp_sync_log_cleanup');
+}

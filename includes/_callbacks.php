@@ -37,7 +37,44 @@ function erpsync_page_fn()
 				</p>
 			</form>
 		<?php endif; ?>
+		
+		<!-- Log viewBox -->
+		<div id="log-viewer" style="margin-top: 20px;">
+			<h3>Logs de Sincronizacióne</h3>
+			<pre id="log-content" style="background: #1e1e1e; color: #00ff00; padding: 15px; height: 400px; overflow-y: auto; white-space: pre-wrap;"></pre>
+			<button type="button" id="clear-logs" class="button">Clear</button>
+		</div>
 	</div>
+	
+	<script>
+	jQuery(document).ready(function($) {
+		let lastPosition = 0;
+		let logContent = $('#log-content');
+		
+		function pollLogs() {
+			$.post(ajaxurl, {
+				action: 'get_log_content',
+				security: '<?php echo wp_create_nonce('erp_log_nonce'); ?>',
+				last_position: lastPosition
+			}, function(response) {
+				if (response.success && response.data.content) {
+					logContent.append(response.data.content);
+					lastPosition = response.data.position;
+					logContent.scrollTop(logContent[0].scrollHeight);
+				}
+			});
+		}
+		
+		// Poll every second
+		setInterval(pollLogs, 1000);
+		
+		// Clear logs
+		$('#clear-logs').click(function() {
+			logContent.empty();
+		});
+		
+	});
+	</script>
 	<?php
 }
 

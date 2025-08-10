@@ -190,7 +190,14 @@ class ERPtoWoo {
         
         return true;
     } catch (Exception $e) {
-        self::logger("Product creation failed: " . $e->getMessage());
+        $error_message = $e->getMessage();
+
+        // if error message is ~"duplicated SKU" write other log message
+        if (strpos($error_message, 'Invalid or duplicated SKU') !== false) {
+            self::logger("Product with ID $product_id not created - matching product already exists in WooCommerce");
+        } else {
+            self::logger("Product creation failed: " . $error_message);
+        }
         return false;
     }
   }
