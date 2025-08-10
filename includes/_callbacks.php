@@ -402,7 +402,7 @@ function setting_api_url_fn()
 
 	// implement $value here to avoid error when the user hasnt saved the value yet, and therefore doesn't exist in the database yet
 	$value = isset($options['api_url']) ? $options['api_url'] : '';
-	echo "<input id='api_url_txtinput' name='plugin_erpsync[api_url]' size='40' type='text' value='{$options['api_url']}' />";
+	echo "<input id='api_url_txtinput' name='plugin_erpsync[api_url]' size='40' type='text' value='{$value}' />";
 }
 
 // LICENCE KEY
@@ -411,7 +411,7 @@ function setting_license_key_fn()
 	$id = 'license_key';
 	$options = get_option('plugin_erpsync');
 	// echo "<input id='api_url' name='plugin_erpsync[text_string]' size='40' type='password' value='{$options['text_string']}' />";		
-	$value = isset($options[$id]) ? $options[$id] : 'Introduzca la Clave de Licencia Plugin';
+	$value = isset($options[$id]) ? $options[$id] : '';
 	echo "<input id='api_url_txtinput' name='plugin_erpsync[$id]' size='40' type='password' value='{$value}' />";
 }
 
