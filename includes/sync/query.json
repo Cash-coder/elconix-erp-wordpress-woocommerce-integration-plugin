@@ -46,3 +46,51 @@
   }
 }
 
+
+{
+    "class": "PUT",
+    "action": "quotes",
+    "data": {
+        "Ap_Id": "#14659", //here the order id
+        "Cliente": "C00000000219698", // mm
+        "Bodega": "Bodega CEDIS",
+        // "SalesTerm": "CREDIT",
+        "Status": "COMPLETED",
+        "DeliveryNeed": "NO",
+        // "DeliveryType": "Rápida",
+        "Date": "2025-01-14", // order date
+        // "Expira": "2025-02-14",
+        "Comentario": null,
+        "SubTotal": "5.00",
+        "Discount": "0.00",
+        "Taxes": "0.00",
+        "Total": "5.00",
+        "Reservar_Productos": "SI",
+        "Type": "SALES-TEAM",
+        // "Vendedor": "adm@elconix.com",
+        "Currency": "USD",
+        "Currency_Rate": "1.000000000",
+        "Lines": [
+            {
+                "Codigo": "MIGPS00001",
+                "Descripcion": "PROTECTOR DE LIMPIA PARABRISAS AZUL",
+                "Item_Number": "#67-AZ",
+                "Nombre": "PROTECTOR DE LIMPIA PARABRISAS AZUL",
+                // "Bodega": "Bodega CEDIS",
+                "Marca": "S\/M",
+                "Category_L1": "AUTOMOTRIZ",
+                "Category_L2": "ACCESORIOS PARA AUTO",
+                "Category_L3": "",
+                "Unidades": "1.00",
+                "Precio_Unitario": "5.0000",
+                "Discount": "2",
+                "DiscountFactor": "0.40",
+                "TaxID": "1",
+                // "TaxName": "ITBMS",
+                "TaxFactor": "0.00",
+                "TaxValue": "0.0000",
+                "Total": "5.00"
+            }
+        ]
+    }
+}

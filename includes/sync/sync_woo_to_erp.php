@@ -71,6 +71,8 @@ class WooToErp {
 
             $existing_customer = self::get_customer_by_email($customer_email);
 
+            $customer_id = null;
+
             if (!$existing_customer) {
                 // Customer doesn't exist, create new one
                 self::logger('Creating new customer for email: ' . $customer_email);
@@ -80,14 +82,27 @@ class WooToErp {
                 $new_customer = self::create_customer($customer_email, $customer_phone, $customer_country);
 
                 if ($new_customer) {
-                    self::logger('Customer created successfully');
+                    $customer_id = isset($new_customer['id']) ? $new_customer['id'] : null;
+                    self::logger('Customer created successfully with ID: ' . $customer_id);
                 } else {
                     self::logger('ERROR: Failed to create customer for order #' . $order->get_id());
                     continue; // Skip this order if customer creation failed
                 }
             } else {
-                $customer_id = isset($existing_customer['Cliente']) ? $existing_customer['Cliente'] : 'N/A';
+                $customer_id = isset($existing_customer['Cliente']) ? $existing_customer['Cliente'] : null;
                 self::logger('Using existing customer ID: ' . $customer_id . ' for email: ' . $customer_email);
+            }
+
+            // Upload order to ERP if we have a customer ID
+            if ($customer_id) {
+                $order_upload_result = self::upload_order_to_erp($order, $customer_id);
+                if ($order_upload_result) {
+                    self::logger('Order #' . $order->get_id() . ' successfully synced to ERP');
+                } else {
+                    self::logger('ERROR: Failed to upload order #' . $order->get_id() . ' to ERP');
+                }
+            } else {
+                self::logger('ERROR: No customer ID available for order #' . $order->get_id());
             }
 
             // Log the order details
@@ -226,6 +241,59 @@ class WooToErp {
     }
 
     /**
+     * Upload order to ERP
+     */
+    public static function upload_order_to_erp($order, $customer_id) {
+        // Prepare order items array
+        $order_items = array();
+        foreach ($order->get_items() as $item_id => $item) {
+            $product = $item->get_product();
+            $order_items[] = array(
+                "ProductId" => $product ? $product->get_sku() : '',
+                "Description" => $item->get_name(),
+                "Quantity" => $item->get_quantity(),
+                "Price" => $item->get_total() / $item->get_quantity(), // Unit price
+                "TaxFactor" => "0.00",
+                "TaxValue" => "0.0000",
+                "Total" => $item->get_total()
+            );
+        }
+
+        $query_array = [
+            "class" => "PUT",
+            "action" => "quotes",
+            "data" => [
+                // "Ap_Id" => "#" . $order->get_id(),
+                "Ap_Id" => "#TEST" . rand(10000, 99999),
+                "Cliente" => $customer_id,
+                "Bodega" => "Bodega CEDIS",
+                "Status" => "COMPLETED",
+                "Items" => $order_items
+            ]
+        ];
+        $query = json_encode($query_array, JSON_UNESCAPED_SLASHES);
+
+        self::logger('Uploading order #' . $order->get_id() . ' to ERP with customer ID: ' . $customer_id);
+        $response = self::make_erp_api_request($query);
+
+        // Convert response to string and check for 'success' word using regex
+        $response_string = is_array($response) ? json_encode($response) : (string)$response;
+        if (preg_match('/"response":\s*"Success"/', $response_string)) {
+            // Extract Quote ID using regex
+            $quote_id = 'N/A';
+            if (preg_match('/"id":\s*"([^"]+)"/', $response_string, $matches)) {
+                $quote_id = $matches[1];
+            }
+
+            self::logger('Order uploaded successfully - Quote ID: ' . $quote_id);
+            return $response;
+        }
+
+        self::logger('Failed to upload order #' . $order->get_id() . ' to ERP');
+        return false;
+    }
+
+    /**
      * Make API request to ERP
      */
     private static function make_erp_api_request($query) {
@@ -275,6 +343,19 @@ class WooToErp {
                 return false;
             }
 
+            // Handle mixed HTML/JSON response - extract JSON part
+            if (strpos($response_body, '{"class"') !== false) {
+                // Find the JSON part in the response
+                $json_start = strpos($response_body, '{"class"');
+                $json_part = substr($response_body, $json_start);
+                $decoded_response = json_decode($json_part, true);
+
+                if ($decoded_response) {
+                    return $decoded_response;
+                }
+            }
+
+            // Try to decode the full response as JSON
             $decoded_response = json_decode($response_body, true);
             return $decoded_response;
         } else {
