@@ -55,13 +55,45 @@ class WooToErp {
             self::logger('No orders to sync');
             return;
         }
-        
+
         self::logger('Starting to sync ' . count($orders) . ' orders to ERP');
-        
+
         foreach ($orders as $order) {
+            // Check if customer exists in ERP
+            $customer_email = $order->get_billing_email();
+            self::logger('Processing order #' . $order->get_id() . ' with email: "' . $customer_email . '"');
+
+            if (empty($customer_email)) {
+                self::logger('WARNING: Order #' . $order->get_id() . ' has empty billing email - skipping customer check');
+                self::log_single_order($order);
+                continue;
+            }
+
+            $existing_customer = self::get_customer_by_email($customer_email);
+
+            if (!$existing_customer) {
+                // Customer doesn't exist, create new one
+                self::logger('Creating new customer for email: ' . $customer_email);
+                $customer_phone = $order->get_billing_phone();
+                $customer_country = $order->get_billing_country();
+
+                $new_customer = self::create_customer($customer_email, $customer_phone, $customer_country);
+
+                if ($new_customer) {
+                    self::logger('Customer created successfully');
+                } else {
+                    self::logger('ERROR: Failed to create customer for order #' . $order->get_id());
+                    continue; // Skip this order if customer creation failed
+                }
+            } else {
+                $customer_id = isset($existing_customer['Cliente']) ? $existing_customer['Cliente'] : 'N/A';
+                self::logger('Using existing customer ID: ' . $customer_id . ' for email: ' . $customer_email);
+            }
+
+            // Log the order details
             self::log_single_order($order);
         }
-        
+
         self::logger('Successfully synced ' . count($orders) . ' orders to ERP');
     }
     
@@ -134,5 +166,120 @@ class WooToErp {
         }
         
         self::logger('-------- END ORDER #' . $order->get_id() . ' --------');
+    }
+
+    /**
+     * Get customer ID from ERP by email
+     */
+    public static function get_customer_by_email($email) {
+        $query_array = [
+            "class" => "GET",
+            "action" => "customers",
+            "filters" => [
+                [
+                    "field" => "Email",
+                    "type" => "=",
+                    "value" => $email
+                ]
+            ]
+        ];
+        $query = json_encode($query_array, JSON_UNESCAPED_SLASHES);
+
+        $response = self::make_erp_api_request($query);
+
+        if ($response && isset($response['customers']) && !empty($response['customers'])) {
+            self::logger('Customer found with email: ' . $email);
+            return $response['customers'][0];
+        }
+
+        self::logger('No customer found with email: ' . $email);
+        return false;
+    }
+
+    /**
+     * Create new customer in ERP
+     */
+    public static function create_customer($email, $phone = '', $country = '') {
+        $query_array = [
+            "class" => "PUT",
+            "action" => "customers",
+            "data" => [
+                "Email" => $email,
+                "Cellular" => $phone,
+                "Pais" => $country
+            ]
+        ];
+        $query = json_encode($query_array, JSON_UNESCAPED_SLASHES);
+
+        $response = self::make_erp_api_request($query);
+
+        if ($response && isset($response['response']) && $response['response']['response'] === 'Success') {
+            $customer_id = $response['response']['id'];
+            $token = $response['response']['Token'];
+
+            self::logger('Customer created successfully - ID: ' . $customer_id);
+            return $response['response'];
+        }
+
+        self::logger('Failed to create customer with email: ' . $email);
+        return false;
+    }
+
+    /**
+     * Make API request to ERP
+     */
+    private static function make_erp_api_request($query) {
+        // Get plugin options for API settings
+        $options = get_option('plugin_erpsync');
+        $api_url = isset($options['api_url']) ? $options['api_url'] : '';
+        $api_key = isset($options['api_key']) ? $options['api_key'] : '';
+
+        if (empty($api_url) || empty($api_key)) {
+            self::logger('ERROR: API URL or API Key not configured');
+            return false;
+        }
+
+        // Prepare the request
+        $headers = array(
+            'Content-Type' => 'application/json',
+            'X-ENX-Token' => $api_key
+        );
+
+        $args = array(
+            'body' => $query,
+            'headers' => $headers,
+            'method' => 'POST',
+            'timeout' => 40
+        );
+
+        // self::logger('Making API request to: ' . $api_url);
+        self::logger('Request data: ' . $query);
+
+        // Make the request
+        $response = wp_remote_post($api_url, $args);
+        // self::logger('Full response array: ' . print_r($response, true));
+
+        if (is_wp_error($response)) {
+            self::logger('API request error: ' . $response->get_error_message());
+            return false;
+        }
+
+        $response_code = wp_remote_retrieve_response_code($response);
+        $response_body = wp_remote_retrieve_body($response);
+
+        self::logger('API response code: ' . $response_code);
+        self::logger('API response body: ' . $response_body);
+
+        if ($response_code >= 200 && $response_code < 300) {
+            if (empty($response_body)) {
+                return false;
+            }
+
+            $decoded_response = json_decode($response_body, true);
+            return $decoded_response;
+        } else {
+            self::logger('API request failed with code: ' . $response_code);
+            return false;
+        }
     }
 }

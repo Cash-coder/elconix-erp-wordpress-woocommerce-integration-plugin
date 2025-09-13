@@ -2,7 +2,7 @@
   "class": "PUT",
   "action": "quotes",
   "data": {
-      "Ap_Id": "none",
+      "Ap_Id": "", //order id
       "Cliente": "C00000000219698",
       "Bodega": "Bodega CEDIS",
       "SalesTerm": "CREDIT",
@@ -45,3 +45,4 @@
       ]
   }
 }
+
