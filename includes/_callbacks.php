@@ -40,7 +40,7 @@ function erpsync_page_fn()
 		
 		<!-- Log viewBox -->
 		<div id="log-viewer" style="margin-top: 20px;">
-			<h3>Logs de Sincronizacióne</h3>
+			<h3>Logs de Sincronización</h3>
 			<pre id="log-content" style="background: #1e1e1e; color: #00ff00; padding: 15px; height: 400px; overflow-y: auto; white-space: pre-wrap;"></pre>
 			<button type="button" id="clear-logs" class="button">Clear</button>
 		</div>
