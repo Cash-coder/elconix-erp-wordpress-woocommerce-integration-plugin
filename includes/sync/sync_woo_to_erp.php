@@ -4,10 +4,6 @@ require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
 
 class WooToErp {
     
-    /**
-     * Dummy function to test wooToErp sync functionality
-     * This function will be triggered by the action scheduler
-     */
     public static function perform_sync_woo_to_erp() {
         // Log that the function is being triggered
         UserNotice::log_message('[WooToErp] sync_woo_to_erp being triggered at ' . date('Y-m-d H:i:s'));
@@ -104,18 +100,32 @@ class WooToErp {
         foreach ($order->get_items() as $item_id => $item) {
             $product = $item->get_product();
             
-            // Get product categories for this specific product
+            // Get product categories and subcategories for this specific product
             $categories = '';
             if ($product) {
                 $category_ids = $product->get_category_ids();
-                $category_names = array();
+                $category_hierarchy = array(); // subcategories
                 foreach ($category_ids as $category_id) {
                     $category = get_term($category_id, 'product_cat');
                     if ($category && !is_wp_error($category)) {
-                        $category_names[] = $category->name;
+                        // Build category hierarchy (parent > child)
+                        $hierarchy = array();
+                        $current_category = $category;
+                        
+                        // Build hierarchy from child to parent
+                        while ($current_category) {
+                            array_unshift($hierarchy, $current_category->name);
+                            if ($current_category->parent) {
+                                $current_category = get_term($current_category->parent, 'product_cat');
+                            } else {
+                                break;
+                            }
+                        }
+                        
+                        $category_hierarchy[] = implode(' > ', $hierarchy);
                     }
                 }
-                $categories = !empty($category_names) ? implode(', ', $category_names) : 'N/A';
+                $categories = !empty($category_hierarchy) ? implode(', ', $category_hierarchy) : 'N/A';
             } else {
                 $categories = 'N/A';
             }
