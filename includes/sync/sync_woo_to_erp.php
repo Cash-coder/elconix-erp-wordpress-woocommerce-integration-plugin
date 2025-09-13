@@ -27,4 +27,8 @@ class WooToErp {
     public static function test_function() {
         UserNotice::log_message('[WooToErp] Test function called');
     }
+
+    private static function logger($message){
+        UserNotice::log_message('[WooToERP] ' . $message);
+    }
 }

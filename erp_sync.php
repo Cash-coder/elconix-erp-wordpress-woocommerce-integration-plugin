@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Elconix ERP Sync
- * Description: Sync Elconix ERP data with WooCommerce and viceversa
+ * Description: Sync Elconix ERP with your website and viceversa
  * Version: 1.7
  * Author: Vako Lovecraft
  * Author URI: https://vako-lovecraft.com/   

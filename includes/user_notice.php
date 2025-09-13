@@ -2,13 +2,15 @@
 class UserNotice {
 
   public static function log_message($message) {
-    $log_file = ERP_SYNC_PLUGIN_DIR . 'erp_sync.log';
+    
+    $LOG_FILE = ERP_SYNC_PLUGIN_DIR . 'erp_sync.log';
+    
     // $timestamp = date('[Y-m-d UTC] ');
     $timestamp = date('[Y-m-d H:i:s] ');
     $formatted_message = $timestamp . $message . PHP_EOL;
     
     // Ensure the file is writable and create if it doesn't exist
-    file_put_contents($log_file, $formatted_message, FILE_APPEND | LOCK_EX);
+    file_put_contents($LOG_FILE, $formatted_message, FILE_APPEND | LOCK_EX);
   }
 
   public static function admin_notice_message($type, $message){
