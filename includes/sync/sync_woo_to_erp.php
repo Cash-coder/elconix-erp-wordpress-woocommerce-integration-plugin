@@ -244,18 +244,54 @@ class WooToErp {
      * Upload order to ERP
      */
     public static function upload_order_to_erp($order, $customer_id) {
-        // Prepare order items array
-        $order_items = array();
+        // Get order dates
+        $order_date = $order->get_date_created() ? $order->get_date_created()->format('Y-m-d') : date('Y-m-d');
+        $expire_date = date('Y-m-d', strtotime($order_date . ' +30 days'));
+
+        // Prepare order lines array
+        $order_lines = array();
         foreach ($order->get_items() as $item_id => $item) {
             $product = $item->get_product();
-            $order_items[] = array(
-                "ProductId" => $product ? $product->get_sku() : '',
-                "Description" => $item->get_name(),
-                "Quantity" => $item->get_quantity(),
-                "Price" => $item->get_total() / $item->get_quantity(), // Unit price
+
+            // Get product categories
+            $category_l1 = '';
+            $category_l2 = '';
+            $category_l3 = '';
+            if ($product) {
+                $category_ids = $product->get_category_ids();
+                $categories = array();
+                foreach ($category_ids as $category_id) {
+                    $category = get_term($category_id, 'product_cat');
+                    if ($category && !is_wp_error($category)) {
+                        $categories[] = $category->name;
+                    }
+                }
+                $category_l1 = isset($categories[0]) ? $categories[0] : '';
+                $category_l2 = isset($categories[1]) ? $categories[1] : '';
+                $category_l3 = isset($categories[2]) ? $categories[2] : '';
+            }
+
+            $unit_price = $item->get_total() / $item->get_quantity();
+
+            $order_lines[] = array(
+                "Codigo" => $product ? $product->get_sku() : '',
+                "Descripcion" => $item->get_name(),
+                "Item_Number" => '',
+                "Nombre" => $item->get_name(),
+                "Bodega" => "Bodega CEDIS",
+                "Marca" => "S/M",
+                "Category_L1" => $category_l1,
+                "Category_L2" => $category_l2,
+                "Category_L3" => $category_l3,
+                "Unidades" => (string)$item->get_quantity(),
+                "Precio_Unitario" => number_format($unit_price, 4),
+                "Discount" => "0",
+                "DiscountFactor" => "0.00",
+                "TaxID" => "1",
+                "TaxName" => "ITBMS",
                 "TaxFactor" => "0.00",
                 "TaxValue" => "0.0000",
-                "Total" => $item->get_total()
+                "Total" => number_format($item->get_total(), 2)
             );
         }
 
@@ -267,8 +303,23 @@ class WooToErp {
                 "Ap_Id" => "#TEST" . rand(10000, 99999),
                 "Cliente" => $customer_id,
                 "Bodega" => "Bodega CEDIS",
-                "Status" => "COMPLETED",
-                "Items" => $order_items
+                "SalesTerm" => "CREDIT",
+                "Status" => "ACTIVE",
+                "DeliveryNeed" => "YES",
+                "DeliveryType" => "Rápida",
+                "Date" => $order_date,
+                "Expira" => $expire_date,
+                "Comentario" => null,
+                "SubTotal" => number_format($order->get_subtotal(), 2),
+                "Discount" => number_format($order->get_discount_total(), 2),
+                "Taxes" => number_format($order->get_total_tax(), 2),
+                "Total" => number_format($order->get_total(), 2),
+                "Reservar_Productos" => "SI",
+                "Type" => "SALES-TEAM",
+                "Vendedor" => "adm@elconix.com",
+                "Currency" => $order->get_currency(),
+                "Currency_Rate" => "1.000000000",
+                "Lines" => $order_lines
             ]
         ];
         $query = json_encode($query_array, JSON_UNESCAPED_SLASHES);

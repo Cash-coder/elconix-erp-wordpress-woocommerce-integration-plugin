@@ -55,7 +55,7 @@ class ERPtoWoo {
     // while 5 calls, get prods, check responses, import to woo
     
     // $api_calls_limit = 2; // 25 prods by call
-    $api_calls_limit = 99999; // 25 prods by call
+    $api_calls_limit = 1; // 25 prods by call - LIMITED TO 1 CALL FOR TESTING
     $api_call_number = 0;
     $api_error_number = 0;
 
@@ -148,17 +148,17 @@ class ERPtoWoo {
             }
         }
         
-        // Skip product creation if no stock available
-        if ($stock_quantity <= 0) {
-            $product_id = $product_data['Producto']['id'] ?? 'unknown';
-            $product_name = $product_data['Producto']['Nombre'] ?? 'unknown';
-            self::logger("product ID $product_id with name $product_name not created due to 0 stock in warehouse Rebajamoda via España");
-            return false;
-        }
+        // Skip product creation if no stock available - COMMENTED OUT FOR TESTING
+        // if ($stock_quantity <= 0) {
+        //     $product_id = $product_data['Producto']['id'] ?? 'unknown';
+        //     $product_name = $product_data['Producto']['Nombre'] ?? 'unknown';
+        //     self::logger("product ID $product_id with name $product_name not created due to 0 stock in warehouse Rebajamoda via España");
+        //     return false;
+        // }
         
         $product = new WC_Product_Simple();
         $product->set_name($product_data['Producto']['Nombre'] ?? '');
-        $product->set_sku($product_data['Producto']['Item_Number'] ?? '');
+        $product->set_sku($product_data['Producto']['id'] ?? '');
         $product->set_regular_price($product_data['Producto']['Precio_Venta'] ?? 1);
         
         // Set stock quantity and management

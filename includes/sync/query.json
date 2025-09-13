@@ -94,3 +94,9 @@
         ]
     }
 }
+
+
+{"class":"PUT","action":"quotes","data":
+{"Ap_Id":"#TEST58930",
+"Cliente":"C00000000219707","Bodega":"Bodega CEDIS",
+"Status":"COMPLETED","Items":[{"ProductId":"PM-AW0AW14978","Description":"BILLETERA TH DAMA","Quantity":1,"Price":5,"TaxFactor":"0.00","TaxValue":"0.0000","Total":"5"},{"ProductId":"PM-U62512364","Description":"BOXER TH","Quantity":1,"Price":15,"TaxFactor":"0.00","TaxValue":"0.0000","Total":"15"}]}}
