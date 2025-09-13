@@ -58,7 +58,12 @@ class WooToErp {
 
         self::logger('Starting to sync ' . count($orders) . ' orders to ERP');
 
+        $orders_total_processed = 0;
+        $orders_synced_successfully = 0;
+
         foreach ($orders as $order) {
+            $orders_total_processed++;
+
             // Check if customer exists in ERP
             $customer_email = $order->get_billing_email();
             self::logger('Processing order #' . $order->get_id() . ' with email: "' . $customer_email . '"');
@@ -97,6 +102,7 @@ class WooToErp {
             if ($customer_id) {
                 $order_upload_result = self::upload_order_to_erp($order, $customer_id);
                 if ($order_upload_result) {
+                    $orders_synced_successfully++;
                     self::logger('Order #' . $order->get_id() . ' successfully synced to ERP');
                 } else {
                     self::logger('ERROR: Failed to upload order #' . $order->get_id() . ' to ERP');
@@ -109,7 +115,8 @@ class WooToErp {
             self::log_single_order($order);
         }
 
-        self::logger('Successfully synced ' . count($orders) . ' orders to ERP');
+        self::logger('Sincronizados con éxito ' . $orders_synced_successfully . '/' . $orders_total_processed . ' pedidos.');
+        UserNotice::admin_notice_message('success', 'Sincronizados con éxito ' . $orders_synced_successfully . '/' . $orders_total_processed . ' pedidos.');
     }
     
     /**
