@@ -283,7 +283,7 @@ function orders_sync_fn()
 		$checked = ' checked="checked" ';
 	}
 	// echo "<input class='sub-option' ".$checked." id='orders_chk' name='plugin_erpsync[orders_sync]' type='checkbox' />";
-	echo '<div class="sub-option"><input id="orders_chk" name="plugin_erpsync[orders_sync]" type="checkbox" /></div>';
+	echo '<div class="sub-option"><input id="orders_chk" name="plugin_erpsync[orders_sync]" type="checkbox" ' . $checked . '/></div>';
 }
 
 // returns

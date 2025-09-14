@@ -100,3 +100,9 @@
 {"Ap_Id":"#TEST58930",
 "Cliente":"C00000000219707","Bodega":"Bodega CEDIS",
 "Status":"COMPLETED","Items":[{"ProductId":"PM-AW0AW14978","Description":"BILLETERA TH DAMA","Quantity":1,"Price":5,"TaxFactor":"0.00","TaxValue":"0.0000","Total":"5"},{"ProductId":"PM-U62512364","Description":"BOXER TH","Quantity":1,"Price":15,"TaxFactor":"0.00","TaxValue":"0.0000","Total":"15"}]}}
+
+
+
+[2025-09-13 23:05:29] [WooToERP] Request data: {"class":"PUT","action":"quotes","data":{"Ap_Id":"#TEST71594","Cliente":"C00000000219707","Bodega":"Bodega CEDIS","SalesTerm":"CREDIT","Status":"ACTIVE","DeliveryNeed":"YES","DeliveryType":"R\u00e1pida","Date":"2025-09-13","Expira":"2025-10-13","Comentario":null,"SubTotal":"20.00","Discount":"0.00","Taxes":"0.00","Total":"20.00","Reservar_Productos":"SI","Type":"SALES-TEAM","Vendedor":"adm@elconix.com","Currency":"NIO","Currency_Rate":"1.000000000","Lines":[{"Codigo":"PM-AW0AW14978","Descripcion":"BILLETERA TH DAMA","Item_Number":"","Nombre":"BILLETERA TH DAMA","Bodega":"Bodega CEDIS","Marca":"S/M","Category_L1":"Billetera","Category_L2":"","Category_L3":"","Unidades":"1","Precio_Unitario":"5.0000","Discount":"0","DiscountFactor":"0.00","TaxID":"1","TaxName":"ITBMS","TaxFactor":"0.00","TaxValue":"0.0000","Total":"5.00"},{"Codigo":"PM-U62512364","Descripcion":"BOXER TH","Item_Number":"","Nombre":"BOXER TH","Bodega":"Bodega CEDIS","Marca":"S/M","Category_L1":"Boxer","Category_L2":"","Category_L3":"","Unidades":"1","Precio_Unitario":"15.0000","Discount":"0","DiscountFactor":"0.00","TaxID":"1","TaxName":"ITBMS","TaxFactor":"0.00","TaxValue":"0.0000","Total":"15.00"}]}}
+[2025-09-13 23:05:30] [WooToERP] API response code: 200
+[2025-09-13 23:05:30] [WooToERP] API response body: {"class":"PUT","action":"quotes","error":"Item Id PM-AW0AW14978, not exist or is INACTIVE!"}

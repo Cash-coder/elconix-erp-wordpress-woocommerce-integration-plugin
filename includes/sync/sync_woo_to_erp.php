@@ -25,6 +25,64 @@ class WooToErp {
     }
 
     /**
+     * Get CSV file path for processed orders
+     */
+    private static function get_orders_csv_path() {
+        return ERP_SYNC_PLUGIN_DIR . 'orders_id.csv';
+    }
+
+    /**
+     * Get list of already processed order IDs from CSV
+     */
+    private static function get_processed_order_ids() {
+        $csv_file = self::get_orders_csv_path();
+        $processed_ids = array();
+
+        if (file_exists($csv_file)) {
+            if (($handle = fopen($csv_file, 'r')) !== FALSE) {
+                // Skip header row if exists
+                $header = fgetcsv($handle);
+
+                while (($data = fgetcsv($handle)) !== FALSE) {
+                    if (!empty($data[0])) {
+                        $processed_ids[] = $data[0];
+                    }
+                }
+                fclose($handle);
+            }
+        }
+
+        return $processed_ids;
+    }
+
+    /**
+     * Add order ID to processed orders CSV
+     */
+    private static function add_order_to_csv($order_id) {
+        $csv_file = self::get_orders_csv_path();
+        $file_exists = file_exists($csv_file);
+
+        if (($handle = fopen($csv_file, 'a')) !== FALSE) {
+            // Write header if file is new
+            if (!$file_exists) {
+                fputcsv($handle, array('order_id'));
+            }
+
+            // Write order ID
+            fputcsv($handle, array($order_id));
+            fclose($handle);
+        }
+    }
+
+    /**
+     * Check if order ID has already been processed
+     */
+    private static function is_order_processed($order_id) {
+        $processed_ids = self::get_processed_order_ids();
+        return in_array($order_id, $processed_ids);
+    }
+
+    /**
      * Get all WooCommerce orders with 'completed' status
      */
     public static function get_all_completed_orders() {
@@ -62,11 +120,19 @@ class WooToErp {
         $orders_synced_successfully = 0;
 
         foreach ($orders as $order) {
+            $order_id = $order->get_id();
+
+            // Check if order has already been processed
+            if (self::is_order_processed($order_id)) {
+                self::logger('Order #' . $order_id . ' already processed - skipping');
+                continue;
+            }
+
             $orders_total_processed++;
 
             // Check if customer exists in ERP
             $customer_email = $order->get_billing_email();
-            self::logger('Processing order #' . $order->get_id() . ' with email: "' . $customer_email . '"');
+            self::logger('Processing order #' . $order_id . ' with email: "' . $customer_email . '"');
 
             if (empty($customer_email)) {
                 self::logger('WARNING: Order #' . $order->get_id() . ' has empty billing email - skipping customer check');
@@ -104,6 +170,9 @@ class WooToErp {
                 if ($order_upload_result) {
                     $orders_synced_successfully++;
                     self::logger('Order #' . $order->get_id() . ' successfully synced to ERP');
+
+                    // Add order ID to CSV file only when successfully processed
+                    self::add_order_to_csv($order_id);
                 } else {
                     self::logger('ERROR: Failed to upload order #' . $order->get_id() . ' to ERP');
                 }
@@ -280,6 +349,16 @@ class WooToErp {
 
             $unit_price = $item->get_total() / $item->get_quantity();
 
+            // Get actual tax values from the item
+            $item_tax_total = $item->get_total_tax();
+            $item_subtotal = $item->get_subtotal();
+            $tax_factor = "0.00";
+
+            // Calculate tax factor as percentage if there's tax and subtotal
+            if ($item_tax_total > 0 && $item_subtotal > 0) {
+                $tax_factor = number_format(($item_tax_total / $item_subtotal) * 100, 2);
+            }
+
             $order_lines[] = array(
                 "Codigo" => $product ? $product->get_sku() : '',
                 "Descripcion" => $item->get_name(),
@@ -296,9 +375,9 @@ class WooToErp {
                 "DiscountFactor" => "0.00",
                 "TaxID" => "1",
                 "TaxName" => "ITBMS",
-                "TaxFactor" => "0.00",
-                "TaxValue" => "0.0000",
-                "Total" => number_format($item->get_total(), 2)
+                "TaxFactor" => $tax_factor,
+                "TaxValue" => number_format($item_tax_total, 4),
+                "Total" => number_format($item->get_total() + $item_tax_total, 2)
             );
         }
 
