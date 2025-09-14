@@ -72,7 +72,7 @@ function perform_erp_sync() {
 
   }
 
-  UserNotice::admin_notice_message('success', 'Sincronización completada con éxio');
+  UserNotice::admin_notice_message('success', 'Sincronización completada con éxito');
   
   logger('**************** Sync End ****************');
 

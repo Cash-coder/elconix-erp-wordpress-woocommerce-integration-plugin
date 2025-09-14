@@ -6,14 +6,27 @@ class WooToErp {
     
     public static function perform_sync_woo_to_erp() {
         // Log that the function is being triggered
-        UserNotice::log_message('[WooToErp] sync_woo_to_erp being triggered at ' . date('Y-m-d H:i:s'));
-        
-        // Get all completed orders
-        $orders = self::get_all_completed_orders();
-        
-        // Sync orders to ERP
-        self::sync_orders_to_erp($orders);
-        
+        self::logger('sync_woo_to_erp being triggered at ' . date('Y-m-d H:i:s'));
+
+        $options = get_option('plugin_erpsync');
+
+        // Sync orders if enabled
+        if (isset($options['orders_sync']) && $options['orders_sync']) {
+            $orders = self::get_all_completed_orders();
+            self::sync_orders_to_erp($orders);
+        }
+
+        // sync returns if enabled
+        if (isset($options['returns_sync']) && $options['returns_sync']) {
+            // Add returns sync here
+            self::logger('------ returns being processed ------');
+
+            // to avoid duplicated orders, create a new csv file only for refunded orders alrady processed. if current order id in that file: skip this order (because its already synced). avoid using existing orders.csv file because refunded orders are already there always
+
+            // API error, function inactive for the moment
+
+        }
+
         // Log completion
         UserNotice::log_message('[WooToErp] sync_woo_to_erp completed');
         
@@ -385,8 +398,8 @@ class WooToErp {
             "class" => "PUT",
             "action" => "quotes",
             "data" => [
-                // "Ap_Id" => "#" . $order->get_id(),
-                "Ap_Id" => "#TEST" . rand(10000, 99999),
+                "Ap_Id" => "#" . $order->get_id(), // using order's id as cotización id
+                // "Ap_Id" => "#TEST" . rand(10000, 99999), // apply random id to test order sync many times
                 "Cliente" => $customer_id,
                 "Bodega" => "Bodega CEDIS",
                 "SalesTerm" => "CREDIT",

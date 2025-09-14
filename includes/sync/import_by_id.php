@@ -82,7 +82,7 @@ class ImportById {
     } // end foreach
 
     // admin notice "importados x/y productos"
-    UserNotice::admin_notice_message('success', 'Importados con éxito ' . $success_count . '/' . $total_count . ' productos');
+    UserNotice::admin_notice_message('success', 'Importados con éxito ' . $success_count . '/' . $total_count . ' productos mediante ID');
 
     // success
     return true;    
