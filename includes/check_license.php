@@ -7,6 +7,7 @@
  */
 
 require_once ERP_SYNC_PLUGIN_DIR . 'includes/user_notice.php';
+require_once ERP_SYNC_PLUGIN_DIR . 'config.php';
 
 class License {
 
@@ -24,7 +25,7 @@ class License {
                 'client_name' => '-'
             ]),
             'headers' => [
-                'LB-API-KEY' => '7C2BEEA1921AFBCC172EwhatsappC6',
+                'LB-API-KEY' => LB_API_KEY, // from config.php file
                 'LB-URL' => site_url(),
                 'LB-IP' => $client_ip,
                 'LB-LANG' => 'english',

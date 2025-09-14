@@ -1,2 +1,5 @@
 # Log files
 erp_sync.log
+
+# Configuration files with sensitive data
+config.php
